@@ -1164,6 +1164,7 @@ public class CcddLinkManagerDialog extends CcddDialogHandler
                                                   currentLinks,
                                                   null,
                                                   null,
+                                                  null,
                                                   invalidatedLinkVars,
                                                   null,
                                                   CcddLinkManagerDialog.this);

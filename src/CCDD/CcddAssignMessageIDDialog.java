@@ -26,9 +26,9 @@
 package CCDD;
 
 import static CCDD.CcddConstants.CLOSE_ICON;
-import static CCDD.CcddConstants.OK_ICON;
 import static CCDD.CcddConstants.GROUP_DATA_FIELD_IDENT;
 import static CCDD.CcddConstants.OK_BUTTON;
+import static CCDD.CcddConstants.OK_ICON;
 import static CCDD.CcddConstants.PROTECTED_MSG_ID_IDENT;
 import static CCDD.CcddConstants.EventLogMessageType.STATUS_MSG;
 
@@ -62,6 +62,7 @@ import javax.swing.border.BevelBorder;
 import javax.swing.border.Border;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.tree.TreeSelectionModel;
 
 import CCDD.CcddBackgroundCommand.BackgroundCommand;
 import CCDD.CcddClassesDataTable.FieldInformation;
@@ -78,7 +79,6 @@ import CCDD.CcddConstants.ModifiableFontInfo;
 import CCDD.CcddConstants.ModifiableSizeInfo;
 import CCDD.CcddConstants.ModifiableSpacingInfo;
 import CCDD.CcddConstants.TableTreeType;
-import javax.swing.tree.TreeSelectionModel;
 
 /**************************************************************************************************
  * CFS Command and Data Dictionary message ID assignment dialog class
@@ -1096,6 +1096,7 @@ public class CcddAssignMessageIDDialog extends CcddDialogHandler
             fieldHandler.setFieldInformation(fieldInformation);
             dbTable.storeInformationTable(InternalTable.FIELDS,
                                           fieldHandler.getFieldDefnsFromInfo(),
+                                          null,
                                           null,
                                           null,
                                           null,

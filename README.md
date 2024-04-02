@@ -22,6 +22,7 @@ _Note: The master branch contains_ **CCDD version 1**_, which is superseded by_ 
 Below is a brief description of what has changed in version 2.1.8
 * Corrected handling of macro searches when multiple macro names are involved
 * Updated version and build date extraction from the jar file
+* Corrected handling field updates when all of the fields for a group are removed
  
 *** Version 2.1.7 has been released **
 

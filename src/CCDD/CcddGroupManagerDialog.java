@@ -139,6 +139,9 @@ public class CcddGroupManagerDialog extends CcddDialogHandler
     // List containing the data field list for groups with data field updates
     private List<List<FieldInformation>> updateFields;
 
+    // List containing the names for groups where all fields are removed
+    private List<String> deleteGroupFields;
+
     // List containing the names of any groups that are deleted
     private List<String> deletedGroups;
 
@@ -860,6 +863,7 @@ public class CcddGroupManagerDialog extends CcddDialogHandler
                             dbTable.storeInformationTable(InternalTable.GROUPS,
                                                           currentGroupDefns,
                                                           updateFields,
+                                                          deleteGroupFields,
                                                           deletedGroups,
                                                           null,
                                                           null,
@@ -1684,6 +1688,9 @@ public class CcddGroupManagerDialog extends CcddDialogHandler
         // Create storage for the updated data fields
         updateFields = new ArrayList<List<FieldInformation>>();
 
+        // Create storage for group name where all fields are removed
+        deleteGroupFields = new ArrayList<String>();
+
         // Step through each current group
         for (GroupInformation currentInfo : currentGroupInfo)
         {
@@ -1721,6 +1728,12 @@ public class CcddGroupManagerDialog extends CcddDialogHandler
                     // Add the data fields for this group to the list of those changed
                     updateFields.add(currentInfo.getFieldInformation());
                 }
+                // All of the group's data fields are removed
+                else
+                {
+                    // Add the group name to the list of groups that will have all fields deleted
+                    deleteGroupFields.add(CcddFieldHandler.getFieldGroupName(groupName));
+                }
 
                 // Set the flag indicating a group has changes
                 hasChanges = true;
@@ -1744,7 +1757,9 @@ public class CcddGroupManagerDialog extends CcddDialogHandler
 
         // Check if changes to the group data fields exist, that the data field table editor is
         // open and has unsaved changes, and that the user elects to cancel the update
-        if (!updateFields.isEmpty() && fldTblEditor != null && fldTblEditor.isShowing()
+        if (!updateFields.isEmpty()
+            && fldTblEditor != null
+            && fldTblEditor.isShowing()
             && fldTblEditor.isFieldTableChanged()
             && new CcddDialogHandler().showMessageDialog(groupMgr,
                                                          "<html><b>Discard data field table editor changes?",

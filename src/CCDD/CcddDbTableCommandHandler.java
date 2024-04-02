@@ -7267,6 +7267,7 @@ public class CcddDbTableCommandHandler
                                           null,
                                           null,
                                           null,
+                                          null,
                                           tableComment,
                                           parent);
     }
@@ -7285,6 +7286,9 @@ public class CcddDbTableCommandHandler
      *                             group with a data field update (only applicable to the groups
      *                             table); null if none
      *
+     * @param  deleteGroupFields   List containing the names for groups where all fields are
+     *                             removed
+     *
      * @param deletedGroups        List containing the names of groups that have been deleted
      *
      * @param invalidLinkVars      List containing the link member variables that should be removed
@@ -7299,6 +7303,7 @@ public class CcddDbTableCommandHandler
     protected void storeInformationTableInBackground(final InternalTable intTable,
                                                      final List<String[]> tableData,
                                                      final List<List<FieldInformation>> fieldInformationList,
+                                                     final List<String> deleteGroupFields,
                                                      final List<String> deletedGroups,
                                                      final List<String> invalidLinkVars,
                                                      final String tableComment,
@@ -7316,6 +7321,7 @@ public class CcddDbTableCommandHandler
                 storeInformationTable(intTable,
                                       tableData,
                                       fieldInformationList,
+                                      deleteGroupFields,
                                       deletedGroups,
                                       invalidLinkVars,
                                       tableComment,
@@ -7341,7 +7347,7 @@ public class CcddDbTableCommandHandler
                                          String tableComment,
                                          Component parent)
     {
-        storeInformationTable(intTable, tableData, null, null, null, tableComment, parent);
+        storeInformationTable(intTable, tableData, null, null, null, null, tableComment, parent);
 
         // After storing the new information in the internal table make sure that the field handler
         // is in sync with the current data in the internal table
@@ -7363,6 +7369,9 @@ public class CcddDbTableCommandHandler
      *                             group with a data field update (only applicable to the groups
      *                             table); null if none
      *
+     * @param  deleteGroupFields   List containing the names for groups where all fields are
+     *                             removed
+     *
      * @param deletedGroups        List containing the names of groups that have been deleted
      *
      * @param invalidLinkVars      List containing the link member variables that should be removed
@@ -7377,6 +7386,7 @@ public class CcddDbTableCommandHandler
     protected void storeInformationTable(InternalTable intTable,
                                          List<String[]> tableData,
                                          List<List<FieldInformation>> fieldInformationList,
+                                         List<String> deleteGroupFields,
                                          List<String> deletedGroups,
                                          List<String> invalidLinkVars,
                                          String tableComment,
@@ -7415,6 +7425,17 @@ public class CcddDbTableCommandHandler
                             // Build the command to modify the data fields for the group
                             command.append(modifyFieldsCommand(fieldInformation.get(0).getOwnerName(),
                                                                fieldInformation));
+                        }
+                    }
+
+                    // Check if any group that has had all of the fields removed
+                    if (deleteGroupFields != null)
+                    {
+                        // Step through each group that is to have it fields removed
+                        for (String ownerName : deleteGroupFields)
+                        {
+                            // Append the command to delete the group's fields
+                            command.append(modifyFieldsCommand(ownerName, null));
                         }
                     }
 
