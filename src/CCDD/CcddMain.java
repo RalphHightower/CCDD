@@ -1613,7 +1613,12 @@ public class CcddMain
         {
             // Get the path+name of the .jar file in a format acceptable to the OS
             String jarFileName = System.getProperty("java.class.path")
-                                       .replaceFirst("([^" + File.pathSeparator + "]+).+", "$1");
+                                       .replaceFirst("([^"
+                                                     + File.pathSeparator
+                                                     + "]+)"
+                                                     + File.pathSeparator
+                                                     + ".+",
+                                                     "$1");
 
             if (jarFileName != null)
             {
