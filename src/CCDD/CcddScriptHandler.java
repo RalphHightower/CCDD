@@ -35,6 +35,7 @@ import static CCDD.CcddConstants.GROUP_DATA_FIELD_IDENT;
 import static CCDD.CcddConstants.HIDE_DATA_TYPE;
 import static CCDD.CcddConstants.HIDE_SCRIPT_PATH;
 import static CCDD.CcddConstants.LAF_SCROLL_BAR_WIDTH;
+import static CCDD.CcddConstants.OK_BUTTON;
 import static CCDD.CcddConstants.PATH_COLUMN_DELTA;
 import static CCDD.CcddConstants.TYPE_COLUMN_DELTA;
 import static CCDD.CcddConstants.TYPE_COMMAND;
@@ -43,7 +44,6 @@ import static CCDD.CcddConstants.TYPE_STRUCTURE;
 import static CCDD.CcddConstants.VARIABLE_PATH_SEPARATOR;
 import static CCDD.CcddConstants.EventLogMessageType.FAIL_MSG;
 import static CCDD.CcddConstants.EventLogMessageType.STATUS_MSG;
-import static CCDD.CcddConstants.OK_BUTTON;
 
 import java.awt.Color;
 import java.awt.Component;
@@ -60,6 +60,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -87,9 +88,11 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 import javax.swing.text.JTextComponent;
+import javax.swing.tree.TreeNode;
 
 import CCDD.CcddBackgroundCommand.BackgroundCommand;
 import CCDD.CcddClassesComponent.FileEnvVar;
+import CCDD.CcddClassesComponent.ToolTipTreeNode;
 import CCDD.CcddClassesDataTable.ArrayVariable;
 import CCDD.CcddClassesDataTable.CCDDException;
 import CCDD.CcddClassesDataTable.FieldInformation;
@@ -311,8 +314,28 @@ public class CcddScriptHandler
     private Object[][] getScriptAssociationTableData(Component parent)
     {
         List<Object[]> associationsData = new ArrayList<Object[]>();
-        List<String> structureAndVariablePaths = variableHandler.getStructureAndVariablePaths();
+        List<String> allTables = new ArrayList<String>();
         List<String> verifiedPaths = new ArrayList<String>();
+
+        // Create a prototype and instance table tree
+        CcddTableTreeHandler allTableTree = new CcddTableTreeHandler(ccddMain,
+                                                                     TableTreeType.TABLES,
+                                                                     ccddMain.getMainFrame());
+
+        // Step through all of the nodes in the table tree
+        for (Enumeration<?> element = allTableTree.getRootNode().preorderEnumeration(); element.hasMoreElements();)
+        {
+            // Get the path to this node
+            TreeNode[] nodePath = ((ToolTipTreeNode) element.nextElement()).getPath();
+
+            // Check if the path references a table (instead of the tree's root or header nodes)
+            if (nodePath.length > allTableTree.getHeaderNodeLevel())
+            {
+                // Get the full path for this tree node
+                String varPath = allTableTree.getFullVariablePath(nodePath);
+                allTables.add(varPath);
+            }
+        }
 
         // Read the stored script associations from the database
         List<String[]> committedAssociations = getScriptAssociations(parent);
@@ -338,13 +361,11 @@ public class CcddScriptHandler
                 {
                     if (!verifiedPaths.contains(tablePath))
                     {
-                        if (!structureAndVariablePaths.contains(tablePath))
+                        if (!allTables.contains(tablePath))
                         {
-                            if (!dbTable.isTableExists(tablePath, parent))
-                            {
-                                throw new CCDDException();
-                            }
+                            throw new CCDDException();
                         }
+
                         // Remember each path that was verified
                         verifiedPaths.add(tablePath);
                     }
