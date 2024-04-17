@@ -20,6 +20,7 @@ _Note: The master branch contains_ **CCDD version 1**_, which is superseded by_ 
 *** Version 2.1.9 has been released **
 
 Below is a brief description of what has changed in version 2.1.9
+* Corrected Py4J initialization when running in Windows
 * Corrected issue in script manager association table verification
 * Updated version and build date extraction from the jar file
  

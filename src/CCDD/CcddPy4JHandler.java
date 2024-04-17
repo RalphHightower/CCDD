@@ -24,12 +24,12 @@
  **************************************************************************************************/
 package CCDD;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.script.Bindings;
 import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
@@ -166,7 +166,7 @@ class CcddPy4JGatewayServer
             instance = serverClass.getDeclaredConstructor(Object.class).newInstance(entryPoint);
 
             URL location = serverClass.getResource('/' + serverClass.getName().replace('.', '/') + ".class");
-            version = location.getFile().replaceFirst(".+" + File.separator + "py4j(.+)\\.jar.+", "$1");
+            version = location.getFile().replaceFirst(".+/py4j(.+)\\.jar.+", "$1");
             isValid = true;
         }
         catch (Exception e)
