@@ -3368,8 +3368,17 @@ public abstract class CcddJTableHandler extends JTable
         // Check if all of the existing data is to be replaced
         if (isReplaceAllExisting)
         {
-            // Clear the table of all existing data
-            tableModel.setRowCount(0);
+            // Clear the table of existing data. Retain the primary key values so that when
+            // building updates any differences are treated as modifications, and not as a
+            // combination of a deletion and addition, which can cause loss of information (fields,
+            // group affiliations, etc.) when updating the table in the database
+            for (int row = 0; row < tableModel.getRowCount(); row++)
+            {
+                for (int column = DefaultColumn.ROW_INDEX.ordinal(); column < tableModel.getColumnCount(); column++)
+                {
+                    tableModel.setValueAt("", row, column);
+                }
+            }
         }
 
         // Get the table data array

@@ -3242,7 +3242,7 @@ public class CcddDbTableCommandHandler
             // Build the commands to add, modify, and delete table rows, and to update any table
             // cells or data fields that have the message name & ID input type if a message name or
             // ID value is changed
-            if (!deletions.isEmpty())
+            if (!deletions.isEmpty() && tableInfo.isPrototype())
             {
                 if (buildAndExecuteDeletionCommand(tableInfo,
                                                    deletions,
@@ -3273,7 +3273,7 @@ public class CcddDbTableCommandHandler
                 }
             }
 
-            if (!additions.isEmpty())
+            if (!additions.isEmpty() && tableInfo.isPrototype())
             {
                 if (buildAndExecuteAdditionCommand(tableInfo,
                                                    additions,
@@ -3609,8 +3609,8 @@ public class CcddDbTableCommandHandler
             && (mod.getDataTypeColumn() != -1)
             && (mod.getVariableColumn() != -1))
         {
-            // If this mod represents a new variable that is being added to the table then we need
-            // to assign the appropriate data fields
+            // If this modification represents a new variable that is being added to the table then
+            // the appropriate data fields need to be assigned
             boolean found = false;
 
             for (int index = 0; index < tableInfo.getData().size(); index++)
@@ -3624,8 +3624,8 @@ public class CcddDbTableCommandHandler
                 }
             }
 
-            // Check if a match was found meaning this variable already existed in the table
-            if ((found == false) || (dataTypeChanged == true))
+            // Check if a match was found meaning this variable already exists in the table
+            if (!found || dataTypeChanged)
             {
                 // Get the variable path, including its name and data type
                 String dataType = mod.getRowData()[mod.getDataTypeColumn()].toString();
@@ -3634,7 +3634,7 @@ public class CcddDbTableCommandHandler
 
                 // Check to see if this is an array definition. If so do not add its data to the
                 // internal fields table. If not update any tables that reference this prototype
-                if (((mod.getRowData()[mod.getArraySizeColumn()].equals("")) || (variablePath.endsWith("]"))))
+                if (mod.getRowData()[mod.getArraySizeColumn()].equals("") || variablePath.endsWith("]"))
                 {
                     // Get all variable names currently stored in the database
                     List<String> variableNames = variableHandler.getAllVariableNames();
@@ -3724,7 +3724,7 @@ public class CcddDbTableCommandHandler
                                                                 parent));
                     }
 
-                    for (int index = 0; index < newVariablePaths.size(); index++)
+                    for (String newVarPath : newVariablePaths)
                     {
                         // Copy all data fields with 'all' or 'child only' applicability from the
                         // new child table's prototype to the child table
@@ -3735,7 +3735,7 @@ public class CcddDbTableCommandHandler
                                .append(", E'^")
                                .append(dataType)
                                .append("$', E'")
-                               .append(newVariablePaths.get(index))
+                               .append(newVarPath)
                                .append("'), ")
                                .append(FieldsColumn.FIELD_NAME.getColumnName())
                                .append(", ")
@@ -3897,7 +3897,7 @@ public class CcddDbTableCommandHandler
                     {
                         fieldsAddCmd.append(BuildReferencedVariablesDataFieldsCmd(tableInfo,
                                                                                   add,
-                                                                                  false,
+                                                                                  true,
                                                                                   ignoreErrors,
                                                                                   parent));
                     }
@@ -5497,7 +5497,7 @@ public class CcddDbTableCommandHandler
             // Check if the internal tables are to be updated and the table represents a structure
             if (!skipInternalTables && typeDefn.isStructure())
             {
-                // Get the variable name, data type, and bit length
+                // Get the variable name and data type
                 String variableName = del.getRowData()[del.getVariableColumn()].toString();
                 String dataType = del.getRowData()[del.getDataTypeColumn()].toString();
 

@@ -502,8 +502,8 @@ public class CcddFileIOHandler
                                                      restoreFileType,
                                                      projectName,
                                                      projectOwner,
-                                                     projectOwner,
-                                                     projectDescription);
+                                                     projectDescription,
+                                                     restoreFileName);
                     }
                 }
                 // The file doesn't exist
@@ -2836,6 +2836,7 @@ public class CcddFileIOHandler
             // Check what type of extension is needed
             FileNameExtensionFilter[] extFilter = new FileNameExtensionFilter[1];
             CcddGroupHandler groupHandler = new CcddGroupHandler(ccddMain, null, ccddMain.getMainFrame());
+
             if (dialogType == ManagerDialogType.IMPORT_JSON)
             {
                 extFilter[0] = new FileNameExtensionFilter(FileExtension.JSON.getDescription(),

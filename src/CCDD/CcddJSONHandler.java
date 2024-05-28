@@ -1668,11 +1668,9 @@ public class CcddJSONHandler extends CcddImportExportSupportHandler implements C
                         // defined
                         if (dataFieldsJA != null)
                         {
-
                             // Step through each data field definition
                             for (JSONObject dataFieldJO : parseJSONArray(dataFieldsJA))
                             {
-
                                 // Add the data field definition, checking for (and if possible,
                                 // correcting) errors
                                 ignoreErrors = addImportedDataFieldDefinition(ignoreErrors,
@@ -2382,7 +2380,6 @@ public class CcddJSONHandler extends CcddImportExportSupportHandler implements C
                     // Add the input type to the list of those referenced
                     referencedInputTypes.add(fieldInfo.getInputType().getInputName());
                 }
-
                 // Add the data field column values to the output
                 fieldJO.put(FieldEditorColumnInfo.NAME.getColumnName(),
                             fieldInfo.getFieldName());

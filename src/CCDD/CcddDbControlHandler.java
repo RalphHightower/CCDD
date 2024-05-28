@@ -3451,54 +3451,16 @@ public class CcddDbControlHandler
 
         // Create the names for the restored project and database
         String names[] = getRestoreNames(projectName, overwriteExisting);
-        String restoreProjectName = names[0];
-        String restoreDatabaseName = names[1];
-
-        // Get the list of available databases
-        String[] databases = queryDatabaseList(ccddMain.getMainFrame());
-
-        boolean isMatch = !overwriteExisting;
-        int seqNum = 0;
-        String seqName = "";
-
-        // Continue to check for name matches until the restored database name is unique
-        while (isMatch)
-        {
-            isMatch = false;
-
-            // Step through each existing database name
-            for (String name : databases)
-            {
-                // Check if the name of the restored database name matches that of another database
-                if ((restoreDatabaseName + seqName).equals(name.split(DATABASE_COMMENT_SEPARATOR, 2)[0]))
-                {
-                    // Increment the sequence number and set the flag to indicate a match was
-                    // found. Repeat the process in case this amended name is also a match
-                    seqNum++;
-                    seqName = "_" + seqNum;
-                    isMatch = true;
-                    break;
-                }
-            }
-        }
-
-        // Check if a sequence number is needed to differentiate the database name
-        if (!seqName.isEmpty())
-        {
-            // Add the sequence number to the names
-            restoreProjectName += seqName;
-            restoreDatabaseName += seqName;
-        }
 
         // Check if an existing database is being overwritten; if not, create a new database to
         // which to restore the data and check that it is created successfully
-        if (overwriteExisting || createDatabase(restoreProjectName,
+        if (overwriteExisting || createDatabase(names[0],
                                                 ownerName,
                                                 administrator,
                                                 description))
         {
             // Build the command to restore the database
-            String command = "psql " + getUserHostAndPort() + "-d " + restoreDatabaseName
+            String command = "psql " + getUserHostAndPort() + "-d " + names[1]
                              + " -v ON_ERROR_STOP=true -f ";
 
             // Get the number of command line arguments. Since the restore file name may have
@@ -3552,7 +3514,7 @@ public class CcddDbControlHandler
                 eventLog.logEvent(SUCCESS_MSG,
                                   new StringBuilder("Project '").append(projectName)
                                                                 .append("' restored as '")
-                                                                .append(restoreProjectName)
+                                                                .append(names[0])
                                                                 .append("'"));
             }
         }
@@ -3588,49 +3550,74 @@ public class CcddDbControlHandler
      *                          characters)
      *
      * @param overwriteExisting True to overwrite the existing project database; false to create a
-     *                          new database ion which to restore the backup file contents
+     *                          new database in which to restore the backup file contents
+     *
+     * @return Array containing the project name and the database name
      *********************************************************************************************/
     protected String[] getRestoreNames(String projectName, boolean overwriteExisting)
     {
-        // Create the names for the restored project and database
-        String restoreProjectName = projectName + (overwriteExisting ? "" : "_restored");
-        String restoreDatabaseName = convertProjectNameToDatabase(projectName)
-                                     + (overwriteExisting ? "" : "_restored");
+        String restoreProjectName = projectName;
+        String restoreDatabaseName = convertProjectNameToDatabase(projectName);
 
-        // Get the list of available databases
-        String[] databases = queryDatabaseList(ccddMain.getMainFrame());
-
-        boolean isMatch = !overwriteExisting;
-        int seqNum = 0;
-        String seqName = "";
-
-        // Continue to check for name matches until the restored database name is unique
-        while (isMatch)
+        if (!overwriteExisting)
         {
-            isMatch = false;
+            boolean isExists = false;
+
+            // Get the list of available databases
+            String[] databases = queryDatabaseList(ccddMain.getMainFrame());
 
             // Step through each existing database name
             for (String name : databases)
             {
-                // Check if the name of the restored database name matches that of another database
-                if ((restoreDatabaseName + seqName).equals(name.split(DATABASE_COMMENT_SEPARATOR, 2)[0]))
+                if (projectName.equals(name))
                 {
-                    // Increment the sequence number and set the flag to indicate a match was
-                    // found. Repeat the process in case this amended name is also a match
-                    seqNum++;
-                    seqName = "_" + seqNum;
-                    isMatch = true;
+                    isExists = true;
                     break;
                 }
             }
-        }
 
-        // Check if a sequence number is needed to differentiate the database name
-        if (!seqName.isEmpty())
-        {
-            // Add the sequence number to the names
-            restoreProjectName += seqName;
-            restoreDatabaseName += seqName;
+            if (isExists)
+            {
+                // Create the names for the restored project and database
+                restoreProjectName = projectName + (overwriteExisting ? "" : "_restored");
+                restoreDatabaseName = convertProjectNameToDatabase(projectName)
+                                      + (overwriteExisting ? "" : "_restored");
+
+                boolean isMatch = !overwriteExisting;
+                int seqNum = 0;
+                String seqName = "";
+
+                // Continue to check for name matches until the restored database name is unique
+                while (isMatch)
+                {
+                    isMatch = false;
+
+                    // Step through each existing database name
+                    for (String name : databases)
+                    {
+                        // Check if the name of the restored database name matches that of
+                        // another database
+                        if ((restoreDatabaseName + seqName).equals(name.split(DATABASE_COMMENT_SEPARATOR, 2)[0]))
+                        {
+                            // Increment the sequence number and set the flag to indicate a match
+                            // was found. Repeat the process in case this amended name is also a
+                            // match
+                            seqNum++;
+                            seqName = "_" + seqNum;
+                            isMatch = true;
+                            break;
+                        }
+                    }
+                }
+
+                // Check if a sequence number is needed to differentiate the database name
+                if (!seqName.isEmpty())
+                {
+                    // Add the sequence number to the names
+                    restoreProjectName += seqName;
+                    restoreDatabaseName += seqName;
+                }
+            }
         }
 
         return new String[] {restoreProjectName, restoreDatabaseName};

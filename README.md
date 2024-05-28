@@ -17,6 +17,17 @@ _Note: The master branch contains_ **CCDD version 1**_, which is superseded by_ 
 
 * Beginning with CCDD version 2.1.2 Python 3 is supported
 
+*** Version 2.1.10 has been released **
+
+Below is a brief description of what has changed in version 2.1.10
+* Changed the JTableHandler's pasteData() method to retain the primary key column values when replacing the entire contents of a table. When pasting data into a table, and the option to replace all of the existing table data is true, the entire table was deleted prior to pasting the new data. This included removal of the primary key column, which caused the TableEditorHandler's buildUpdates() method to treat the each row change as a deletion plus an addition since the primary key is used to match the changed rows. This deletion/addition sequence can cause table information to be lost (e.g., inherited fields, group associations, etc.)
+* Removed the call to updatePrimaryKeyIndices() in the TableEditorHandler's buildUpdates() method. This is not needed since the primary keys are retained when pasting. The method is not used, but is retained in the event a use case arises for it
+* Changed the DbTableCommandHandler modifyTableData() method so that it doesn't call the buildAndExecuteDeletionCommand() or buildAndExecuteAdditionCommand() methods for an instance table since only prototypes can have table rows deleted or added
+* Consolidated import code in the CommandLineHandler and corrected calls to the FileHandler's restoreDatabase() where the inputs were in the wrong order
+* Corrected the input order to restoreDatabaseFromJSONOrCSV() in the FileHandler's restoreDatabase() method
+* Removed duplicate code in the DbControlHandler's restoreDatabase() method
+* Changed the DbControlHandler's getRestoreNames() method to not append '_restored' to the database name if the database doesn't currently exist
+
 *** Version 2.1.9 has been released **
 
 Below is a brief description of what has changed in version 2.1.9

@@ -2337,21 +2337,6 @@ public class CcddCommandLineHandler
                 // Check if a connection is made to the PostgreSQL server
                 if (!ccddMain.getDbControlHandler().connectToServer())
                 {
-                    // If this is a dbu file; Create the project database; check if creating the
-                    // database fails. The project can't be created in a background thread since
-                    // the operation may not be complete before subsequent database operations are
-                    // commanded
-                    if (createRestore.endsWith("dbu"))
-                    {
-                        if (!ccddMain.getDbControlHandler().createDatabase(createName,
-                                                                           createOwner,
-                                                                           createOwner,
-                                                                           createDescription))
-                        {
-                            throw new Exception();
-                        }
-                    }
-
                     // Check if a backup file was chosen to restore
                     if (createRestore != null)
                     {
@@ -2360,21 +2345,33 @@ public class CcddCommandLineHandler
                         if (createRestore.endsWith("json"))
                         {
                             ccddMain.getFileIOHandler().restoreDatabase(FileExtension.JSON,
+                                                                        createRestore,
                                                                         createName,
                                                                         createOwner,
-                                                                        createDescription,
-                                                                        createRestore);
+                                                                        createDescription);
                         }
                         else if (createRestore.endsWith("csv"))
                         {
                             ccddMain.getFileIOHandler().restoreDatabase(FileExtension.CSV,
+                                                                        createRestore,
                                                                         createName,
                                                                         createOwner,
-                                                                        createDescription,
-                                                                        createRestore);
+                                                                        createDescription);
                         }
                         else if (createRestore.endsWith("dbu"))
                         {
+                            // Create the project database and check if creating the database
+                            // fails. The project can't be created in a background thread since the
+                            //operation may not be complete before subsequent database operations
+                            // are commanded
+                            if (!ccddMain.getDbControlHandler().createDatabase(createName,
+                                                                               createOwner,
+                                                                               createOwner,
+                                                                               createDescription))
+                            {
+                                throw new Exception();
+                            }
+
                             // Restore the backup file to the newly created project database
                             ccddMain.getFileIOHandler().restoreDatabase(FileExtension.DBU,
                                                                         createRestore,
@@ -2384,8 +2381,8 @@ public class CcddCommandLineHandler
                         }
                         else
                         {
-                            // If we are working with a directory look at the first file within the
-                            // directory to determine if we are working with JSON or CSV files
+                            // If we are working with a directory; look at the first file within
+                            // the directory to determine if we are working with JSON or CSV files
                             FileEnvVar directory = new FileEnvVar(createRestore);
 
                             if (directory.isDirectory())
@@ -2395,18 +2392,18 @@ public class CcddCommandLineHandler
                                 if (firstFile.getName().endsWith(".json"))
                                 {
                                     ccddMain.getFileIOHandler().restoreDatabase(FileExtension.JSON,
+                                                                                createRestore,
                                                                                 createName,
                                                                                 createOwner,
-                                                                                createDescription,
-                                                                                createRestore);
+                                                                                createDescription);
                                 }
                                 else if (firstFile.getName().endsWith(".csv"))
                                 {
                                     ccddMain.getFileIOHandler().restoreDatabase(FileExtension.CSV,
+                                                                                createRestore,
                                                                                 createName,
                                                                                 createOwner,
-                                                                                createDescription,
-                                                                                createRestore);
+                                                                                createDescription);
                                 }
                             }
                         }
