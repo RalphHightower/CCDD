@@ -559,8 +559,9 @@ public class CcddMacroHandler
                     // Check if the text is a valid mathematical expression
                     if (exprResult != null)
                     {
-                        // Set the value to expression result
-                        macroValue = String.valueOf((int) ((double) exprResult));
+                        // Set the value to expression result. Remove the decimal and trailing
+                        // zeroes if the result is a whole number
+                        macroValue = String.valueOf(exprResult).replaceFirst("\\.0*$", "");
                     }
 
                     // Store the expanded macro value
@@ -683,12 +684,11 @@ public class CcddMacroHandler
     {
         boolean result = false;
 
-        if (text.contains(MACRO_IDENTIFIER))
+        if (text != null
+            && text.contains(MACRO_IDENTIFIER)
+            && text.matches(".*" + MACRO_IDENTIFIER + ".+" + MACRO_IDENTIFIER + ".*"))
         {
-            if (text != null && text.matches(".*" + MACRO_IDENTIFIER + ".+" + MACRO_IDENTIFIER + ".*"))
-            {
-                result = true;
-            }
+            result = true;
         }
 
         return result;
@@ -807,14 +807,15 @@ public class CcddMacroHandler
             // expression)
             if (parts.length == 1)
             {
-                // Evaluate the text as a mathematical expression
+                // Evaluate the text as a mathematical expression. Remove the decimal and trailing
+                // zeroes if the result is a whole number
                 Double exprResult = CcddMathExpressionHandler.evaluateExpression(expandedText.toString());
 
                 // Check if the text is a valid mathematical expression
                 if (exprResult != null)
                 {
                     // Set the value to expression result
-                    expandedText = new StringBuilder(String.valueOf((int) ((double) exprResult)));
+                    expandedText = new StringBuilder(String.valueOf(exprResult).replaceFirst("\\.0*$", ""));
                 }
             }
             // The string contains one or more commas. Each substring is evaluated as an expression
@@ -832,8 +833,9 @@ public class CcddMacroHandler
                     // Check if the text is a valid mathematical expression
                     if (exprResult != null)
                     {
-                        // Set the value to expression result
-                        multiText += String.valueOf((int) ((double) exprResult)) + ",";
+                        // Set the value to expression result. Remove the decimal and trailing
+                        // zeroes if the result is a whole number
+                        multiText += String.valueOf(exprResult).replaceFirst("\\.0*$", "") + ",";
                     }
                     // The substring isn't an expression
                     else
@@ -1547,59 +1549,12 @@ public class CcddMacroHandler
             // Step through each macro
             for (String[] macro : macros)
             {
-                // Get the text component's text with the macro value replacing the macro name
+                // Get the text component's text with the expanded macro value replacing the macro
+                // name
                 String text = textComp.getText().substring(0, textComp.getSelectionStart())
-                              + macro[MacrosColumn.VALUE.ordinal()]
+                              + getMacroExpansion(getFullMacroName(macro[MacrosColumn.MACRO_NAME.ordinal()]),
+                                                  validDataTypes)
                               + textComp.getText().substring(textComp.getSelectionEnd());
-
-                // Initialize the parentheses counters. For each left (right) parenthesis a right
-                // (left) one is added to the end (beginning) of the string. This ensures the
-                // parentheses are balanced if the number of left and right parentheses are unequal
-                // or if the one or more right parentheses precedes the first left parenthesis.
-                // Note that this may not match the user's intended final arrangement for the
-                // parentheses; it serves only to ensure that the resulting string a valid formula.
-                // The macro is then evaluated in this context to see if the resulting string
-                // matches the specified input type and thus determine if teh macro is included in
-                // the pop-up menu
-                int leftParenthesisCount = 0;
-                int rightParenthesisCount = 0;
-
-                // Step through each character in the text string
-                for (char c : text.toCharArray())
-                {
-                    // Check if this is a left parenthesis
-                    if (c == '(')
-                    {
-                        // Increment the left parenthesis counter
-                        leftParenthesisCount++;
-                    }
-                    // Check if this is a right parenthesis
-                    else if (c == ')')
-                    {
-                        // Increment the parenthesis counter
-                        rightParenthesisCount++;
-                    }
-                }
-
-                // Perform for the number of left parentheses
-                while (leftParenthesisCount > 0)
-                {
-                    // Append a left parenthesis and decrement the counter
-                    text += ")";
-                    leftParenthesisCount--;
-                }
-
-                // Perform for the number of right parentheses
-                while (rightParenthesisCount > 0)
-                {
-                    // Prepend a left parenthesis and decrement the counter
-                    text = "(" + text;
-                    rightParenthesisCount--;
-                }
-
-                // Create a string version of the new value, replacing any macro in the text with
-                // its corresponding value
-                text = getMacroExpansion(text, validDataTypes);
 
                 // Check if the text component's text, with the macro's value inserted, is allowed
                 // in the target text component based on the component's input type

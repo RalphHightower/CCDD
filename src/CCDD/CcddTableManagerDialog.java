@@ -709,8 +709,7 @@ public class CcddTableManagerDialog extends CcddDialogHandler
                                 CcddFileIOHandler.storePath(ccddMain,
                                                             pathFld.getText(),
                                                             (singleFileRBtn != null ? singleFileRBtn.isSelected()
-                                                                                    : (dialogType == ManagerDialogType.EXPORT_XTCE
-                                                                                      || dialogType == ManagerDialogType.EXPORT_EDS)),
+                                                                                    : true),
                                                             ModifiablePathInfo.TABLE_EXPORT_PATH);
 
                                 // Export the contents of the selected table(s) in the specified
@@ -778,7 +777,7 @@ public class CcddTableManagerDialog extends CcddDialogHandler
                             filePath = choosePathFile(ccddMain,
                                                       caller,
                                                       null,
-                                                      "export",
+                                                      "import",
                                                       new FileNameExtensionFilter[] {new FileNameExtensionFilter(fileExt.getDescription(),
                                                                                                                  fileExt.getExtensionName())},
                                                       false,
@@ -1192,7 +1191,7 @@ public class CcddTableManagerDialog extends CcddDialogHandler
             deleteNonExistingTablesCb.setFont(ModifiableFontInfo.LABEL_BOLD.getFont());
             deleteNonExistingTablesCb.setBorder(emptyBorder);
             deleteNonExistingTablesCb.setToolTipText(CcddUtilities.wrapText("Delete a table from the database if it is not defined in the import file(s)",
-                                                                           ModifiableSizeInfo.MAX_TOOL_TIP_LENGTH.getSize()));
+                                                                            ModifiableSizeInfo.MAX_TOOL_TIP_LENGTH.getSize()));
             deleteNonExistingTablesCb.setEnabled(true);
             gbc.gridy++;
             dialogPnl.add(deleteNonExistingTablesCb, gbc);

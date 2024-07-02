@@ -68,6 +68,7 @@ import javax.print.attribute.HashPrintRequestAttributeSet;
 import javax.print.attribute.PrintRequestAttributeSet;
 import javax.swing.BorderFactory;
 import javax.swing.DefaultCellEditor;
+import javax.swing.Icon;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
@@ -81,6 +82,7 @@ import javax.swing.JTextField;
 import javax.swing.JTextPane;
 import javax.swing.JViewport;
 import javax.swing.KeyStroke;
+import javax.swing.RowSorter;
 import javax.swing.RowSorter.SortKey;
 import javax.swing.SortOrder;
 import javax.swing.SwingConstants;
@@ -110,6 +112,7 @@ import CCDD.CcddConstants.TableInsertionPoint;
 import CCDD.CcddConstants.TableSelectionMode;
 import CCDD.CcddUndoHandler.UndoableTableColumnModel;
 import CCDD.CcddUndoHandler.UndoableTableModel;
+import sun.swing.DefaultLookup;
 
 /**************************************************************************************************
  * CFS Command and Data Dictionary custom Swing table handler class
@@ -1595,7 +1598,8 @@ public abstract class CcddJTableHandler extends JTable
         }
 
         /******************************************************************************************
-         * Override the table header renderer so that the font is set
+         * Override the table header renderer so that the font is set and the sort direction arrow
+         * icon is displayed
          *****************************************************************************************/
         @Override
         public Component getTableCellRendererComponent(JTable jtable,
@@ -1605,8 +1609,47 @@ public abstract class CcddJTableHandler extends JTable
                                                        int row,
                                                        int column)
         {
+            Icon sortIcon = null;
+
             // Set the cell to the string representation of the value
             setText(value == null ? "" : value.toString());
+
+            // Check if the table has a row sorter defined
+            if (table.getRowSorter() != null)
+            {
+                // Get the sort keys
+                java.util.List<? extends RowSorter.SortKey> sortKeys = table.getRowSorter().getSortKeys();
+
+                // Check if the column matches the sorted column
+                if (sortKeys.size() > 0
+                    && sortKeys.get(0).getColumn() == table.convertColumnIndexToModel(column))
+                {
+                    // Get the current sort order
+                    SortOrder sortOrder = sortKeys.get(0).getSortOrder();
+
+                    if (sortOrder != null)
+                    {
+                        // Get the icon depending on the sort order. No icon is shown when the
+                        // column isn't sorted
+                        switch(sortOrder)
+                        {
+                            case ASCENDING:
+                                sortIcon = DefaultLookup.getIcon(this, ui, "Table.ascendingSortIcon");
+                                break;
+
+                            case DESCENDING:
+                                sortIcon = DefaultLookup.getIcon(this, ui, "Table.descendingSortIcon");
+                                break;
+
+                            case UNSORTED:
+                                sortIcon = DefaultLookup.getIcon(this, ui, "Table.naturalSortIcon");
+                                break;
+                        }
+                    }
+                }
+            }
+
+            setIcon(sortIcon);
 
             return this;
         }

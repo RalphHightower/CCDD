@@ -5231,50 +5231,6 @@ public class CcddTableEditorHandler extends CcddInputFieldPanelHandler
     }
 
     /**********************************************************************************************
-     * Update the primary key indices in the table model. Use the row indices, if present, to match
-     * rows between the table model (the current table data) and the committed table data. If the
-     * row index is blank, and if the table is a structure, then use the variable name in the table
-     * model and the committed table to match two rows. When building the table updates this allows
-     * any changes in the row to be treated as a modification; otherwise, the row would be treated
-     * as a deletion and an addition, which can cause loss of information (fields, group
-     * affiliations, etc.)when updating the table in the database
-     *********************************************************************************************/
-    private void updatePrimaryKeyIndices()
-    {
-        boolean isStructure = typeDefn.isStructure();
-
-        // Step through each row in the table model
-        for (int mdlRow = 0; mdlRow < tableModel.getRowCount(); mdlRow++)
-        {
-            // Step through each row in the committed table
-            for (int comRow = 0; comRow < committedTableInfo.getData().size(); comRow++)
-            {
-                // Check if (a) the row index column values are the same and not empty, or (b) the
-                // table is a structure and the variable names are the same
-                if ((!tableModel.getValueAt(mdlRow, rowIndex).toString().isEmpty()
-                    && tableModel.getValueAt(mdlRow, rowIndex).toString()
-                       .equals(committedTableInfo.getData().get(comRow)[rowIndex].toString()))
-                    || (isStructure
-                        && tableModel.getValueAt(mdlRow, variableNameIndex).toString()
-                           .equals(committedTableInfo.getData().get(comRow)[variableNameIndex].toString())))
-                {
-                    // The table model row is the same, or a modification of, the committed data
-                    // row. Copy the primary key column value from the committed table to the table
-                    // model so that when building updates any differences are treated as
-                    // modifications, and not a deletion/addition
-                    tableModel.setValueAt(committedTableInfo.getData().get(comRow)[primaryKeyIndex].toString(),
-                                          mdlRow,
-                                          primaryKeyIndex);
-                    break;
-                }
-            }
-        }
-
-        // Flag the end of the editing sequence for undo/redo purposes
-        table.getUndoManager().endEditSequence();
-    }
-
-    /**********************************************************************************************
      * Compare the current table data to the committed table data and create lists of the changed
      * values necessary to update the table in the database to match the current values
      *********************************************************************************************/
@@ -5304,10 +5260,6 @@ public class CcddTableEditorHandler extends CcddInputFieldPanelHandler
 
         // Create an empty row of data for comparison purposes
         Object[] emptyRow = table.getEmptyRow();
-
-// TODO Not needed; the primary key column values are retained when importing (in JTableHandler pasteData())
-//        // Check to see if the primary keys need to be updated or reordered
-//        updatePrimaryKeyIndices();
 
         // Re-index the rows in case any have been added, moved, or deleted
         updateRowIndices();

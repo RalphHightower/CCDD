@@ -340,7 +340,7 @@ public class CcddJSONHandler extends CcddImportExportSupportHandler implements C
     }
 
     /**********************************************************************************************
-     * Build the information from the Application scheduler, Telemetry Scheduler and Script
+     * Build the information from the Application scheduler, Telemetry Scheduler, and Script
      * Association data in the file
      *
      * @param importFile                  Import file reference
@@ -641,6 +641,10 @@ public class CcddJSONHandler extends CcddImportExportSupportHandler implements C
      *
      * @param ignoreErrors            True to ignore all errors in the import file
      *
+     * @param replaceExistingMacros   True to replace the values for existing macros
+     *
+     * @param replaceExistingTables   True to replace existing tables or table fields
+     *
      * @param importingEntireDatabase True to replace existing database internal tables
      *
      * @throws CCDDException If a data is missing, extraneous, or in error in the import file
@@ -854,8 +858,9 @@ public class CcddJSONHandler extends CcddImportExportSupportHandler implements C
                     }
 
                     // Convert all of the new macro definitions to a set of unique entries based on
-                    // the macro name (the first array element) A pair with a boolean indicating if
-                    // the input set was unique and the list of unique entries that were extracted
+                    // the macro name (the first array element), a pair with a boolean indicating
+                    // if the input set was unique, and the list of unique entries that were
+                    // extracted
                     Pair<Boolean, List<String[]>> uniqueResults = convertToUniqueList(macroDefns);
 
                     boolean isDupDetected = !uniqueResults.getLeft();
@@ -864,8 +869,9 @@ public class CcddJSONHandler extends CcddImportExportSupportHandler implements C
                     {
                         // Get the user's input
                         if (new CcddDialogHandler().showMessageDialog(ccddMain.getMainFrame(),
-                                                                      "<html> <b> Continue import and ignore the duplicate values?",
-                                                                      "Duplicate Macros in Input File",
+                                                                      "<html><b>Ignore the duplicate macro(s) and continue import?<br><br></b>"
+                                                                      + CcddUtilities.convertArrayToStringTruncate(duplicateMacroList.toArray(new String[0])),
+                                                                      "Duplicate Macro(s)",
                                                                       JOptionPane.QUESTION_MESSAGE,
                                                                       DialogOption.OK_CANCEL_OPTION) != OK_BUTTON)
                         {

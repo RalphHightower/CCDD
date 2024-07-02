@@ -40,6 +40,7 @@ public class CcddMathExpressionHandler
         private Double dValue;
         private int sign;
         private char operator;
+        private boolean isInteger;
 
         /******************************************************************************************
          * Mathematical expression nest level class constructor
@@ -49,7 +50,8 @@ public class CcddMathExpressionHandler
             dValue = null;
             sign = 1;
             operator = '\0';
-        }
+            isInteger = false;
+         }
 
         /******************************************************************************************
          * Get the value of this nest level
@@ -110,6 +112,26 @@ public class CcddMathExpressionHandler
         {
             this.sign = sign;
         }
+
+        /******************************************************************************************
+         * Get the nest level integer cast flag (when true the value of this nest level is cast as
+         * an integer, rounding it down)
+         *
+         * @return sign Sign value (1 or -1)
+         *****************************************************************************************/
+        public boolean getIsInteger() {
+            return isInteger;
+        }
+
+        /******************************************************************************************
+         * Set the nest level integer cast flag (when true the value of this nest level is cast as
+         * an integer, rounding it down)
+         *
+         * @param isInteger True if the value of this nest level is to be cast as an integer
+         *****************************************************************************************/
+        public void setIsInteger(boolean isInteger) {
+            this.isInteger = isInteger;
+        }
     }
 
     /**********************************************************************************************
@@ -125,6 +147,7 @@ public class CcddMathExpressionHandler
         int levelIndex = 0;
         boolean isExpression = true;
         Double result = null;
+        boolean isInteger = false;
 
         // Create a list to contain the operators and results for each nested portion of the
         // expression
@@ -176,8 +199,8 @@ public class CcddMathExpressionHandler
                     // The level doesn't have a value
                     else
                     {
-                        // Set the flag to indicate that the supplied text isn't an expression (or
-                        // has a syntax error)
+                        // Set the expression flag to false to indicate that the supplied text
+                        // isn't an expression (or has a syntax error)
                         isExpression = false;
                     }
 
@@ -193,8 +216,8 @@ public class CcddMathExpressionHandler
                     // The level doesn't have a value
                     else
                     {
-                        // Set the flag to indicate that the supplied text isn't an expression (or
-                        // has a syntax error)
+                        // Set the expression flag to false to indicate that the supplied text
+                        // isn't an expression (or has a syntax error)
                         isExpression = false;
                     }
 
@@ -202,25 +225,52 @@ public class CcddMathExpressionHandler
 
                 // Start of a nest level operator
                 case '(':
-                    // Create a new nest level
-                    nestLevel = new NestLevel();
-                    nestLevels.add(nestLevel);
-                    levelIndex++;
+                    // Check if this '(' is part of an integer cast, '(int)' (ignore spaces)
+                    if (expression.substring(index + 1).matches(" *int *\\).*"))
+                    {
+                        // Set the flag to indicate that the following individual value or nest
+                        // level will be cast as an integer value (rounded down)
+                        isInteger = true;
+
+                        // Update the text index to skip the cast text and any trailing spaces
+                        index += expression.substring(index + 1).replaceFirst("( *int *\\) *).*", "$1").length();
+                    }
+                    // This is the start of a nest level
+                    else
+                    {
+                        // Create a new nest level
+                        nestLevel = new NestLevel();
+                        nestLevels.add(nestLevel);
+                        levelIndex++;
+
+                        // Set the nest level's integer cast flag to true if a cast precedes the
+                        // level. Reset the individual cast flag since a nest level follows
+                        nestLevel.setIsInteger(isInteger);
+                        isInteger = false;
+                    }
+
                     break;
 
                 // End of a nest level operator
                 case ')':
                     // Check if the current nest level isn't the initial one
-                    if (levelIndex != 0)
+                    if (levelIndex != 0 && nestLevel.getValue() != null)
                     {
+                        // Check if this nest level has an integer cast in effect
+                        if (nestLevel.getIsInteger())
+                        {
+                            // Cast the nest level value to an integer (round down)
+                            nestLevel.setValue(Double.valueOf(nestLevel.getValue().intValue()));
+                        }
+
                         // Check if the nest level has a trailing operator or if the operation
                         // using the current nest level value and the previous level's running
                         // value fails
                         if (nestLevel.getOperator() != '\0'
                             || !performOperation(nestLevel.getValue(), nestLevels.get(levelIndex - 1)))
                         {
-                            // Set the flag to indicate that the nest level failed to evaluate or
-                            // has a trailing operator
+                            // Set the expression flag to false to indicate that the supplied text
+                            // isn't an expression (or has a syntax error)
                             isExpression = false;
                         }
 
@@ -228,12 +278,16 @@ public class CcddMathExpressionHandler
                         nestLevels.remove(levelIndex);
                         levelIndex--;
                         nestLevel = nestLevels.get(levelIndex);
+
+                        // Since this terminates the nest level set the individual cast flag to
+                        // false
+                        isInteger = false;
                     }
                     // This is the initial nest level
                     else
                     {
-                        // Set the flag to indicate that the supplied text isn't an expression (or
-                        // has a syntax error)
+                        // Set the expression flag to false to indicate that the supplied text
+                        // isn't an expression (or has a syntax error)
                         isExpression = false;
                     }
 
@@ -249,8 +303,8 @@ public class CcddMathExpressionHandler
                     // The level doesn't have a value
                     else
                     {
-                        // Set the flag to indicate that the supplied text isn't an expression (or
-                        // has a syntax error)
+                        // Set the expression flag to false to indicate that the supplied text
+                        // isn't an expression (or has a syntax error)
                         isExpression = false;
                     }
 
@@ -265,8 +319,8 @@ public class CcddMathExpressionHandler
                     // The level doesn't have a value
                     else
                     {
-                        // Set the flag to indicate that the supplied text isn't an expression (or
-                        // has a syntax error)
+                        // Set the expression flag to false to indicate that the supplied text
+                        // isn't an expression (or has a syntax error)
                         isExpression = false;
                     }
 
@@ -286,16 +340,16 @@ public class CcddMathExpressionHandler
                         // The level doesn't have a value
                         else
                         {
-                            // Set the flag to indicate that the supplied text isn't an expression
-                            // (or has a syntax error)
+                            // Set the expression flag to false to indicate that the supplied text
+                            // isn't an expression (or has a syntax error)
                             isExpression = false;
                         }
                     }
                     // The next character isn't a '<'
                     else
                     {
-                        // Set the flag to indicate that the supplied text isn't an expression (or
-                        // has a syntax error)
+                        // Set the expression flag to false to indicate that the supplied text
+                        // isn't an expression (or has a syntax error)
                         isExpression = false;
                     }
 
@@ -315,16 +369,16 @@ public class CcddMathExpressionHandler
                         // The level doesn't have a value
                         else
                         {
-                            // Set the flag to indicate that the supplied text isn't an expression
-                            // (or has a syntax error)
+                            // Set the expression flag to false to indicate that the supplied text
+                            // isn't an expression (or has a syntax error)
                             isExpression = false;
                         }
                     }
                     // The next character isn't a '>'
                     else
                     {
-                        // Set the flag to indicate that the supplied text isn't an expression (or
-                        // has a syntax error)
+                        // Set the expression flag to false to indicate that the supplied text
+                        // isn't an expression (or has a syntax error)
                         isExpression = false;
                     }
 
@@ -346,13 +400,36 @@ public class CcddMathExpressionHandler
                 case '8':
                 case '9':
                 case '.':
-                    // Extract the numeric value (integer or floating point) from the text
-                    // beginning at the current text index
-                    String sValue = expression.substring(index).replaceFirst("([0-9\\.]+).*", "$1");
+                    // Extract the numeric value (integer or floating point) as a string from the
+                    // text beginning at the current text index
+                    String sValue = expression.substring(index).replaceFirst("([0-9\\.\\+\\-eE]+).*", "$1");
 
-                    // Perform the operation using the current value and the nest level's running
-                    // value. Set the flag if the evaluation fails
-                    isExpression = performOperation(Double.valueOf(sValue), nestLevel);
+                    try
+                    {
+                        // Convert the string to its floating point numeric value
+                        Double dValue = Double.valueOf(sValue);
+
+                        // Check if an integer cast is in effect
+                        if (isInteger)
+                        {
+                            // Convert the floating point value to an integer (round down)
+                            dValue = Double.valueOf(dValue.intValue());
+
+                            // Reset the individual value integer cast flag
+                            isInteger = false;
+                        }
+
+                        // Perform the operation using the current value and the nest level's
+                        // running value. Set the expression flag to false if the evaluation fails
+                        isExpression = performOperation(dValue, nestLevel);
+                    }
+                    catch (NumberFormatException nfe)
+                    {
+                        // Not an actual numeric value; set the expression flag to false to
+                        // indicate that the supplied text isn't an expression (or has a syntax
+                        // error)
+                        isExpression = false;
+                    }
 
                     // Update the text index to skip the numerals and decimal point encompassed by
                     // the numeric value
@@ -361,8 +438,8 @@ public class CcddMathExpressionHandler
 
                 // Non-mathematical expression character
                 default:
-                    // Set the flag to indicate that the supplied text isn't an expression (or has
-                    // a syntax error)
+                    // Set the expression flag to false to indicate that the supplied text isn't an
+                    // expression (or has a syntax error)
                     isExpression = false;
                     break;
             }

@@ -145,6 +145,8 @@ public class CcddImportExportSupportHandler
     protected int cmdArgumentIndex;
     protected int cmdDescriptionIndex;
 
+    protected List<String> duplicateMacroList;
+
     // Basic primitive data types
     protected static enum BasePrimitiveDataType
     {
@@ -501,7 +503,7 @@ public class CcddImportExportSupportHandler
 
                     // Create a table type definition for command tables
                     TableTypeDefinition tableTypeDefn = new TableTypeDefinition(typeName,
-                                                                               "0Import command table type");
+                                                                                "0Import command table type");
 
                     // Step through each default command column
                     for (Object[] columnDefn : DefaultColumn.getDefaultColumnDefinitions(TYPE_COMMAND, false))
@@ -645,33 +647,12 @@ public class CcddImportExportSupportHandler
      *********************************************************************************************/
     public List<TableInfo> loadTablesforJsonOrCsvExport(String[] tableNames)
     {
-        // Add the prototype of each supplied table name (if not already in the array of supplied
-        // table names)
-        List<String> tableNamesWithProtos = new ArrayList<String>();
+        List<TableInfo> tableDefs = new ArrayList<TableInfo>(tableNames.length);
 
         for (String tableName : tableNames)
         {
-            tableNamesWithProtos.add(tableName);
-            String protoName = TableInfo.getPrototypeName(tableName);
-
-            if (!tableNamesWithProtos.contains(protoName))
-            {
-                // Put the prototypes at the head of the list so that they're processed first below
-                tableNamesWithProtos.add(0, protoName);
-            }
-        }
-
-        // Initialize local variables
-        List<TableInfo> tableDefs = new ArrayList<TableInfo>(tableNamesWithProtos.size());
-
-        // Check if any tables are provided
-        if (tableNamesWithProtos.size() != 0)
-        {
-            for (String tableName : tableNamesWithProtos)
-            {
-                // Load the table data, accounting for value inheritance and override
-                tableDefs.add(loadTableData(tableName));
-            }
+            // Load the table data, accounting for value inheritance and override
+            tableDefs.add(loadTableData(tableName));
         }
 
         return tableDefs;
@@ -2075,50 +2056,53 @@ public class CcddImportExportSupportHandler
     /**********************************************************************************************
      * Convert a list to a unique list and detect if there are any duplicate entries
      *
-     * @param NewMacroDefns A list of string arrays containing information
+     * @param newMacroDefns A list of string arrays containing information
      *
-     * @return Pair containing a list of unique values and a Boolean indicating if the set was
+     * @return Pair containing a list of unique values and a flag indicating if the set is
      *         unique
      *********************************************************************************************/
-    protected ImmutablePair<Boolean, List<String[]>> convertToUniqueList(List<String[]> NewMacroDefns)
+    protected ImmutablePair<Boolean, List<String[]>> convertToUniqueList(List<String[]> newMacroDefns)
     {
-        if (NewMacroDefns == null)
-        {
-            return null;
-        }
-        if (NewMacroDefns.isEmpty())
+        if (newMacroDefns == null || newMacroDefns.isEmpty())
         {
             return null;
         }
 
-        boolean isDuplicate = true;
+        boolean isUnique = true;
         Set<String> uniqueSet = new HashSet<String>();
-        List<String[]> uniqueMacroList = new ArrayList<>();
+        List<String[]> uniqueMacroList = new ArrayList<String[]>();
+        duplicateMacroList = new ArrayList<String>();
 
         // Go through each entry in the list
-        for (String[] macros : NewMacroDefns)
+        for (String[] macros : newMacroDefns)
         {
             // Bad input in the string array, exit
             if (macros == null)
             {
                 return null;
             }
-            String macroName = macros[0];
+
+            String macroName = macros[MacrosColumn.MACRO_NAME.ordinal()];
+
             // Check if it is in the unique set already
             if (uniqueSet.contains(macroName))
             {
-                // Mark the flag if it is
-                isDuplicate = false;
+                isUnique = false;
+
+                if (!duplicateMacroList.contains(macroName))
+                {
+                    duplicateMacroList.add(macroName);
+                }
             }
             else
             {
-                // Otherwise add this unique value to the list
+                // Otherwise add this unique value to the list and the set
                 uniqueMacroList.add(macros);
-                // And the set
                 uniqueSet.add(macroName);
             }
         }
-        return new ImmutablePair<>(isDuplicate, uniqueMacroList);
+
+        return new ImmutablePair<>(isUnique, uniqueMacroList);
     }
 
     /**********************************************************************************************

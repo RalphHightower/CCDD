@@ -959,10 +959,10 @@ public class CcddFileIOHandler
             if (!ccddMain.isGUIHidden())
             {
                 // Store the restore file path in the backing store
-                CcddFileIOHandler.storePath(ccddMain,
-                                            dataFile[0].getAbsolutePath(),
-                                            true,
-                                            ModifiablePathInfo.DATABASE_BACKUP_PATH);
+                storePath(ccddMain,
+                          dataFile[0].getAbsolutePath(),
+                          true,
+                          ModifiablePathInfo.DATABASE_BACKUP_PATH);
 
                 // Multi-file import
                 if (dataFile.length > 1)
@@ -1332,7 +1332,7 @@ public class CcddFileIOHandler
      * @param backupFirst                 True to create a backup of the database before importing
      *                                    tables
      *
-     * @param replaceExistingTables             True to replace a table that already exists in the
+     * @param replaceExistingTables       True to replace a table that already exists in the
      *                                    database
      *
      * @param appendExistingFields        True to append the existing data fields for a table (if
@@ -1721,8 +1721,8 @@ public class CcddFileIOHandler
                                                   importingEntireDatabase);
                     }
                     else if (fileName.equals(FileNames.TELEM_SCHEDULER.No_Extension())
-                            || fileName.equals(FileNames.APP_SCHEDULER.No_Extension())
-                            || fileName.equals(FileNames.SCRIPT_ASSOCIATION.No_Extension()))
+                             || fileName.equals(FileNames.APP_SCHEDULER.No_Extension())
+                             || fileName.equals(FileNames.SCRIPT_ASSOCIATION.No_Extension()))
                     {
                         // Import any internal table found
                         ioHandler.importInternalTables(file,
@@ -1741,7 +1741,9 @@ public class CcddFileIOHandler
                                          replaceExistingGroups,
                                          replaceExistingTables);
 
-                if (ioHandler.getTableDefinitions() != null)
+                // Check if any table definitions were found and incorporate them into a list
+                if (ioHandler.getTableDefinitions() != null
+                    && fileType != ManagerDialogType.IMPORT_EDS)
                 {
                     // Step through each table definition from the import file. This for loop also
                     // guards against trying to import the same file more than once
@@ -3067,7 +3069,7 @@ public class CcddFileIOHandler
                 else
                 {
                     // Inform the user that there are no perceptible changes to the files relative
-                    // to current db state
+                    // to current database state
                     new CcddDialogHandler().showMessageDialog(ccddMain.getMainFrame(),
                                                               "<html><b>The selected folder/file does "
                                                               + "not contain any updates</b>",
@@ -3566,10 +3568,6 @@ public class CcddFileIOHandler
                         {
                             // Export the formatted JSON or CSV table data to the specified file
                             tableDefs = ioHandler.loadTablesforJsonOrCsvExport(tablePaths);
-
-                            // Update the progress bar to reflect any additional (prototype) tables
-                            // added
-                            ioHandler.setProgressMaximum(tableDefs.size());
                         }
                         else
                         {
@@ -3615,14 +3613,15 @@ public class CcddFileIOHandler
                 {
                     List<TableInfo> tableDefs = null;
 
+// TODO
                     if ((fileExtn == FileExtension.JSON) || (fileExtn == FileExtension.CSV))
                     {
                         // Export the formatted tables
                         tableDefs = ioHandler.loadTablesforJsonOrCsvExport(tablePaths);
 
-                        // Update the progress bar to reflect any additional (prototype) tables
-                        // added
-                        ioHandler.setProgressMaximum(tableDefs.size());
+//                        // Update the progress bar to reflect any additional (prototype) tables
+//                        // added
+//                        ioHandler.setProgressMaximum(tableDefs.size());
                     }
                     else
                     {
@@ -4093,6 +4092,7 @@ public class CcddFileIOHandler
             // Strip the file name from the path
             pathName = pathName.substring(0, pathName.lastIndexOf(File.separator));
         }
+
         // Check if the path name ends with a period
         if (pathName.endsWith("."))
         {

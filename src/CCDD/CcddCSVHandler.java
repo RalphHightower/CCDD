@@ -870,8 +870,9 @@ public class CcddCSVHandler extends CcddImportExportSupportHandler implements Cc
                 if (NewMacroDefns.size() > 0)
                 {
                     // Convert all of the new macro definitions to a set of unique entries based on
-                    // the macro name (the first array element) A pair with a boolean indicating if
-                    // the input set was unique and the list of unique entries that were extracted
+                    // the macro name (the first array element), a pair with a boolean indicating
+                    // if the input set was unique, and the list of unique entries that were
+                    // extracted
                     Pair<Boolean, List<String[]>> uniqueResults = convertToUniqueList(NewMacroDefns);
                     boolean isDupDetected = !uniqueResults.getLeft();
 
@@ -879,8 +880,9 @@ public class CcddCSVHandler extends CcddImportExportSupportHandler implements Cc
                     {
                         // Get the user's input
                         if (new CcddDialogHandler().showMessageDialog(ccddMain.getMainFrame(),
-                                                                      "<html> <b> Continue import and ignore the duplicate values?",
-                                                                      "Duplicate Macros in Input File",
+                                                                      "<html><b>Ignore the duplicate macro(s) and continue import?<br><br></b>"
+                                                                      + CcddUtilities.convertArrayToStringTruncate(duplicateMacroList.toArray(new String[0])),
+                                                                      "Duplicate Macro(s)",
                                                                       JOptionPane.QUESTION_MESSAGE,
                                                                       DialogOption.OK_CANCEL_OPTION) != OK_BUTTON)
                         {

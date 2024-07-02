@@ -17,6 +17,16 @@ _Note: The master branch contains_ **CCDD version 1**_, which is superseded by_ 
 
 * Beginning with CCDD version 2.1.2 Python 3 is supported
 
+*** Version 2.1.11 has been released **
+
+Below is a brief description of what has changed in version 2.1.11
+* Changed math expression handler to allow integer casts ('(int)')
+* Changed to allow expressions to result in floating point values (instead of forcing an integer). Note that expressions used as array indices must now be whole numbers (using the '(int)' cast if necessary) 
+* Restored the sort arrows to table column headers
+* Corrected storing of the table export path in the backing store for JSON and CSV files
+* Removed exporting the prototype along with the instance table information for JSON and CSV files. This caused issues when attempting to import the file directly into the table since the prototype's information (being first in the file) would be used
+* Corrected an error in the database verification that incorrectly indicated non-existent variables in the __values table. The array definition variable path was not properly identified
+
 *** Version 2.1.10 has been released **
 
 Below is a brief description of what has changed in version 2.1.10

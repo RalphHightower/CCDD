@@ -29,10 +29,10 @@ import static CCDD.CcddConstants.CANCEL_BUTTON;
 import static CCDD.CcddConstants.CLOSE_ICON;
 import static CCDD.CcddConstants.GROUP_DATA_FIELD_IDENT;
 import static CCDD.CcddConstants.INTERNAL_TABLE_PREFIX;
+import static CCDD.CcddConstants.MANUAL_FIX;
 import static CCDD.CcddConstants.OK_ICON;
 import static CCDD.CcddConstants.PRINT_ICON;
 import static CCDD.CcddConstants.TLM_SCH_SEPARATOR;
-import static CCDD.CcddConstants.MANUAL_FIX;
 import static CCDD.CcddConstants.TYPE_STRUCTURE;
 import static CCDD.CcddConstants.EventLogMessageType.STATUS_MSG;
 
@@ -75,7 +75,6 @@ import CCDD.CcddConstants.DefaultColumn;
 import CCDD.CcddConstants.DefaultInputType;
 import CCDD.CcddConstants.EventLogMessageType;
 import CCDD.CcddConstants.InternalTable;
-import CCDD.CcddConstants.MessageIDSortOrder;
 import CCDD.CcddConstants.InternalTable.AssociationsColumn;
 import CCDD.CcddConstants.InternalTable.FieldsColumn;
 import CCDD.CcddConstants.InternalTable.GroupsColumn;
@@ -84,6 +83,7 @@ import CCDD.CcddConstants.InternalTable.OrdersColumn;
 import CCDD.CcddConstants.InternalTable.TableTypesColumn;
 import CCDD.CcddConstants.InternalTable.TlmSchedulerColumn;
 import CCDD.CcddConstants.InternalTable.ValuesColumn;
+import CCDD.CcddConstants.MessageIDSortOrder;
 import CCDD.CcddConstants.ModifiableColorInfo;
 import CCDD.CcddConstants.ModifiableFontInfo;
 import CCDD.CcddConstants.ModifiableSpacingInfo;
@@ -1509,13 +1509,15 @@ public class CcddDbVerificationHandler
                         // Check if the path represents an array member
                         if (ArrayVariable.isArrayMember(variablePath))
                         {
-                            // Pull the array dimensions out of the path
-                            String arraySize = ArrayVariable.getVariableArrayIndex(variablePath);
+                            // Get the variable path for the array definition by removing the array
+                            // index (or indices if multidimensional)
+                            String arrayDefnPath = variablePath.replaceFirst("^(.+[A-Za-z0-9_])\\[.+$",
+                                                                             "$1");
 
-                            if (ArrayVariable.getNumMembersFromArraySize(arraySize) == 0)
+                            // Store the array definition if it's not already in the list
+                            if (!cleanName.contains(arrayDefnPath))
                             {
-                                // Add the path with no indexes
-                                cleanName.add(ArrayVariable.removeArrayIndex(variablePath));
+                                cleanName.add(arrayDefnPath);
                             }
                         }
                         // Variable is not an array member
