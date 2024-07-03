@@ -557,7 +557,7 @@ true);
 
                 // Check if the list of messages does not include the second sub-message. This
                 // indicates that the parent has no 'real' sub-messages
-                if (!tlmMsgs.contains(parentMsg + "_1"))
+                if (!tlmMsgs.contains((Object) (parentMsg + "_1")))
                 {
                     // Store the parent message name in place of the default sub-message name
                     tlmMsg[1] = parentMsg;
@@ -644,13 +644,13 @@ true);
         else if (isGetDuplicates)
         {
             // Get the index of the owner and ID pair with a matching message ID, if one exists
-            int index = duplicates.indexOf(ownerAndID[1]);
+            int index = duplicates.indexOf((Object) ownerAndID[1]);
 
             // Check if this ID isn't already in the list
             if (index == -1)
             {
                 // Get the index of the ID in the list of potential duplicates
-                int pdIndex = potentialDuplicates.indexOf(ownerAndID[1]);
+                int pdIndex = potentialDuplicates.indexOf((Object) ownerAndID[1]);
 
                 if (pdIndex != -1)
                 {
