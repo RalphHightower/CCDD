@@ -26,6 +26,7 @@ Below is a brief description of what has changed in version 2.1.11
 * Corrected storing of the table export path in the backing store for JSON and CSV files
 * Removed exporting the prototype along with the instance table information for JSON and CSV files. This caused issues when attempting to import the file directly into the table since the prototype's information (being first in the file) would be used
 * Corrected an error in the database verification that incorrectly indicated non-existent variables in the __values table. The array definition variable path was not properly identified
+* Corrected an exception condition when detecting duplicate message IDs and the ID is blank
 
 *** Version 2.1.10 has been released **
 

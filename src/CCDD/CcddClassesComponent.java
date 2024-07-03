@@ -1945,10 +1945,18 @@ public class CcddClassesComponent
                                 break;
 
                             case HEXADECIMAL:
-                                // Compare the two hexadecimal values as integers, converted to
-                                // base 10
-                                result = Integer.decode(item1[compareColumn[index]])
-                                                .compareTo(Integer.decode(item2[compareColumn[index]]));
+                                // Compare the two values as text if either value is a blank
+                                if (item1[compareColumn[index]].isEmpty() || item2[compareColumn[index]].isEmpty())
+                                {
+                                    result = item1[compareColumn[index]].compareToIgnoreCase(item2[compareColumn[index]]);
+                                }
+                                else
+                                {
+                                    // Compare the two hexadecimal values as integers, converted to
+                                    // base 10
+                                    result = Integer.decode(item1[compareColumn[index]])
+                                                    .compareTo(Integer.decode(item2[compareColumn[index]]));
+                                }
                         }
                         index++;
                     } while (result == 0

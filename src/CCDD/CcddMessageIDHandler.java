@@ -557,7 +557,7 @@ true);
 
                 // Check if the list of messages does not include the second sub-message. This
                 // indicates that the parent has no 'real' sub-messages
-                if (!tlmMsgs.contains((Object) (parentMsg + "_1")))
+                if (!tlmMsgs.contains(parentMsg + "_1"))
                 {
                     // Store the parent message name in place of the default sub-message name
                     tlmMsg[1] = parentMsg;
@@ -606,9 +606,15 @@ true);
                                           String[] ownerAndID,
                                           boolean isGetDuplicates)
     {
-        // Convert the message ID from a hexadecimal string to an integer. Remove the protection
-        // flag if present so that the ID can be converted to an integer
-        int msgID = Integer.decode(ownerAndID[1].replaceFirst("\\s*" + PROTECTED_MSG_ID_IDENT, ""));
+        int msgID = -1;
+
+        // Check if the message ID is not a blank
+        if (!ownerAndID[1].isEmpty())
+        {
+            // Convert the message ID from a hexadecimal string to an integer. Remove the
+            // protection flag if present so that the ID can be converted to an integer
+            msgID = Integer.decode(ownerAndID[1].replaceFirst("\\s*" + PROTECTED_MSG_ID_IDENT, ""));
+        }
 
         // Check if the list of duplicate message IDs is to be created
         if (isGetDuplicates)
@@ -616,7 +622,7 @@ true);
             // Prepend the owner type to the owner name and reformat the message ID to remove extra
             // leading zeroes
             ownerAndID[0] = ownerType + ": " + ownerAndID[0].replaceFirst(".*:", "");
-            ownerAndID[1] = "0x" + Integer.toHexString(msgID);
+            ownerAndID[1] = msgID == -1 ? "" : "0x" + Integer.toHexString(msgID);
         }
 
         // Check the message ID isn't already in the list
@@ -638,13 +644,13 @@ true);
         else if (isGetDuplicates)
         {
             // Get the index of the owner and ID pair with a matching message ID, if one exists
-            int index = duplicates.indexOf((Object) ownerAndID[1]);
+            int index = duplicates.indexOf(ownerAndID[1]);
 
             // Check if this ID isn't already in the list
             if (index == -1)
             {
                 // Get the index of the ID in the list of potential duplicates
-                int pdIndex = potentialDuplicates.indexOf((Object) ownerAndID[1]);
+                int pdIndex = potentialDuplicates.indexOf(ownerAndID[1]);
 
                 if (pdIndex != -1)
                 {
