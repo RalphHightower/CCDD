@@ -26,9 +26,11 @@
 package CCDD;
 
 import static CCDD.CcddConstants.COL_VALUE;
+import static CCDD.CcddConstants.INTERNAL_TABLE_PREFIX;
 import static CCDD.CcddConstants.OK_BUTTON;
 import static CCDD.CcddConstants.ROW_NUM_COLUMN_NAME;
 import static CCDD.CcddConstants.ROW_NUM_COLUMN_TYPE;
+import static CCDD.CcddConstants.TABLE_DESCRIPTION_SEPARATOR;
 import static CCDD.CcddConstants.TYPE_ENUM;
 
 import java.io.File;
@@ -52,9 +54,12 @@ import CCDD.CcddConstants.DialogOption;
 import CCDD.CcddConstants.EventLogMessageType;
 import CCDD.CcddConstants.FileExtension;
 import CCDD.CcddConstants.InternalTable;
+import CCDD.CcddConstants.InternalTable.MacrosColumn;
 import CCDD.CcddConstants.InternalTable.TableTypesColumn;
+import CCDD.CcddConstants.InternalTable.ValuesColumn;
 import CCDD.CcddConstants.ModifiablePathInfo;
 import CCDD.CcddConstants.OverwriteFieldValueType;
+import CCDD.CcddConstants.SearchResultsQueryColumn;
 import CCDD.CcddConstants.ServerPropertyDialogType;
 import CCDD.CcddTableTypeHandler.TypeDefinition;
 
@@ -67,6 +72,7 @@ public class CcddPatchHandler
     private final CcddMain ccddMain;
     private final String PATCH_01112023 = "#01112023";
     private final String PATCH_05032023 = "#05032023";
+    private final String PATCH_07232024 = "#07232024";
 
     /**********************************************************************************************
      * CFS Command and Data Dictionary project database patch handler class constructor. The patch
@@ -105,6 +111,18 @@ public class CcddPatchHandler
                                           + "2.1.3 will be incompatible with this project "
                                           + "database after applying the patch";
         patchSet.put(PATCH_05032023, new PatchUtility(PATCH_05032023, patch_05032023_dialogMsg));
+
+        String PATCH_07232024_dialogMsg = "<html><b>Apply patch to add integer casts to math "
+                                          + "expressions?<br><br></b>"
+                                          + "An integer cast, '(int)', is appplied to math "
+                                          + "expressions in tables cells and the macro table "
+                                          + "that include a macro and a division operator. This "
+                                          + "is in case the expression is used where an integer "
+                                          + "is required (e.g., array size). Project databases "
+                                          + "created by CCDD versions prior to 2.1.11 may be "
+                                          + "incompatible with this project database after "
+                                          + "applying the patch";
+        patchSet.put(PATCH_07232024, new PatchUtility(PATCH_07232024, PATCH_07232024_dialogMsg));
     }
 
     /**********************************************************************************************
@@ -153,6 +171,8 @@ public class CcddPatchHandler
                 // rather than int
                 updateTableTypeAndDataTypeTables();
 
+                // Patch #07232024: Add integer casts to math expressions containing macros
+                addIntegerCastsToMathExpressions();
                 break;
         }
     }
@@ -623,6 +643,193 @@ public class CcddPatchHandler
             }
         }
     }
+
+    /**********************************************************************************************
+     * An integer cast, '(int)', is applied to math expressions in tables cells and the macro table
+     * that include a macro and a division operator
+     *********************************************************************************************/
+    private void addIntegerCastsToMathExpressions() throws CCDDException
+    {
+        CcddEventLogDialog eventLog = ccddMain.getSessionEventLog();
+        CcddDbControlHandler dbControl = ccddMain.getDbControlHandler();
+        CcddDbCommandHandler dbCommand = ccddMain.getDbCommandHandler();
+        CcddDbTableCommandHandler dbTable = ccddMain.getDbTableCommandHandler();
+        CcddMacroHandler macroHandler = ccddMain.getMacroHandler();
+        CcddTableTypeHandler tableTypeHandler = ccddMain.getTableTypeHandler();
+
+        try
+        {
+            // Check if the patch has not already been applied
+            String patchTable = InternalTable.PATCH.getTableName() + PATCH_07232024.replace("#", "");
+
+            if (!dbTable.isTableExists(patchTable, ccddMain.getMainFrame()))
+            {
+                // Check if the user cancels installing the patch
+                if (!patchSet.get(PATCH_07232024).confirmPatchApplication())
+                {
+                    throw new CCDDException(patchSet.get(PATCH_07232024).getUserCanceledMessage());
+                }
+
+                // Back up the project database before applying the patch
+                backupDatabase(dbControl);
+
+                // Create a save point in case an error occurs while applying the patch
+                dbCommand.createSavePoint(ccddMain.getMainFrame());
+
+                // Create the patch table to prevent reapplying the patch
+                dbCommand.executeDbCommand(new StringBuilder("CREATE TABLE ").append(patchTable)
+                                                                             .append(" ();"),
+                                           ccddMain.getMainFrame());
+
+                // Get the macro table contents and removed the row number column
+                List<String[]> tableData = dbTable.queryDatabase(new StringBuilder("SELECT * FROM "
+                                                                                   + InternalTable.MACROS.getTableName()
+                                                                                   + ";"),
+                                                                 ccddMain.getMainFrame());
+                tableData = CcddUtilities.removeArrayListColumn(tableData, MacrosColumn.ROW_NUM.ordinal());
+
+                // Step through each row in the macro table
+                for (int row = 0; row < tableData.size(); row++)
+                {
+                    // Get the macro value
+                    String changeColumnValue = tableData.get(row)[MacrosColumn.VALUE.ordinal()];
+
+                    // Check if the macro value contains a a '/' (indicating a possible division
+                    // operation) macro reference, evaluates to a number, and doesn't already
+                    // include an integer cast
+                    if (changeColumnValue.contains("/")
+                        && CcddMacroHandler.hasMacro(changeColumnValue)
+                        && CcddMathExpressionHandler.evaluateExpression(macroHandler.getMacroExpansion(changeColumnValue)) != null
+                        && !changeColumnValue.contains("(int)"))
+                    {
+                        // Add an integer cast to the macro value
+                        tableData.get(row)[MacrosColumn.VALUE.ordinal()] = "(int) (" + changeColumnValue + ")";
+                    }
+
+                    // Step through each table entry that references the macro
+                    for (String macroRef : macroHandler.searchMacroReferences(tableData.get(row)[MacrosColumn.MACRO_NAME.ordinal()],
+                                                                              false,
+                                                                              ccddMain.getMainFrame()))
+                    {
+                        String changeColumnName = null;
+                        String matchText = null;
+
+                        // Split the macro reference into table name, column name, table type, and
+                        // context
+                        String[] tblColTDescAndCntxt = macroRef.split(TABLE_DESCRIPTION_SEPARATOR, 4);
+
+                        // Create a reference to the search result's database table name and row
+                        // data to shorten comparisons below
+                        String refTableName = tblColTDescAndCntxt[SearchResultsQueryColumn.TABLE.ordinal()];
+                        String[] refContext = CcddUtilities.splitAndRemoveQuotes(tblColTDescAndCntxt[SearchResultsQueryColumn.CONTEXT.ordinal()]);
+
+                        // Set to true if the referenced table is a prototype table and false if
+                        // the reference is to the internal custom values table
+                        boolean isPrototype = !refTableName.startsWith(INTERNAL_TABLE_PREFIX);
+
+                        // Check if the referenced table is a prototype table
+                        if (isPrototype)
+                        {
+                            // Get the column name containing the macro reference and use the
+                            // primary key as the column matching criteria for the SQL command
+                            changeColumnName = tblColTDescAndCntxt[SearchResultsQueryColumn.COLUMN.ordinal()];
+                            matchText = DefaultColumn.PRIMARY_KEY.getDbName() + " = '" + refContext[DefaultColumn.PRIMARY_KEY.ordinal()] + "'";
+
+                            // Get the contents of the column containing the macro, based on the
+                            // column name and table type definition
+                            String tableType = tblColTDescAndCntxt[SearchResultsQueryColumn.COMMENT.ordinal()].split(",", 2)[1];
+                            TypeDefinition typeDefn = tableTypeHandler.getTypeDefinition(tableType);
+                            changeColumnValue = refContext[typeDefn.getColumnIndexByDbName(changeColumnName)];
+                        }
+                        // The reference is in the custom values table
+                        else
+                        {
+                            // Get the column name containing the macro reference and use the
+                            // table path and column name as the matching criteria for the SQL
+                            // command
+                            changeColumnName = ValuesColumn.VALUE.getColumnName();
+                            matchText = ValuesColumn.TABLE_PATH.getColumnName()
+                                        + " = '"
+                                        + refContext[ValuesColumn.TABLE_PATH.ordinal()]
+                                        + "' AND "
+                                        + ValuesColumn.COLUMN_NAME.getColumnName()
+                                        + " = '"
+                                        + refContext[ValuesColumn.COLUMN_NAME.ordinal()]
+                                        + "'" ;
+                            changeColumnValue = refContext[ValuesColumn.VALUE.ordinal()];
+                        }
+
+                        // Check if the macro value contains a a '/' (indicating a possible
+                        // division operation) macro reference, evaluates to a number, and doesn't
+                        // already include an integer cast
+                        if (changeColumnValue.contains("/")
+                            && CcddMathExpressionHandler.evaluateExpression(macroHandler.getMacroExpansion(changeColumnValue)) != null
+                            && !changeColumnValue.contains("(int)"))
+                        {
+                            // Add an integer cast to the column value
+                            dbCommand.executeDbCommand(new StringBuilder("UPDATE ").append(refTableName)
+                                                                                   .append(" SET ")
+                                                                                   .append(changeColumnName)
+                                                                                   .append(" = '(int) (")
+                                                                                   .append(changeColumnValue)
+                                                                                   .append(")' WHERE ")
+                                                                                   .append(matchText)
+                                                                                   .append(";"),
+                                                       ccddMain.getMainFrame());
+                        }
+                    }
+                }
+
+                // Update the macro table with the integer casts
+                dbTable.storeNonTableTypesInfoTable(InternalTable.MACROS,
+                                                    tableData,
+                                                    null,
+                                                    ccddMain.getMainFrame());
+
+                // Release the save point. This must be done within a transaction block, so it must
+                // be done prior to the commit below
+                dbCommand.releaseSavePoint(ccddMain.getMainFrame());
+
+                // Commit the change(s) to the database
+                dbControl.getConnection().commit();
+
+                // Inform the user that updating the database tables completed
+                eventLog.logEvent(EventLogMessageType.SUCCESS_MSG,
+                                  new StringBuilder("Project '").append(dbControl.getProjectName())
+                                                                .append("' add integer casts complete"));
+            }
+        }
+        catch (Exception e)
+        {
+            // Inform the user that converting the command tables failed
+            eventLog.logFailEvent(ccddMain.getMainFrame(),
+                                  "Cannot add integer casts to math expressions in project '"
+                                  + dbControl.getProjectName()
+                                  + "'; cause '"
+                                  + e.getMessage()
+                                  + "'",
+                                  "<html><b>Cannot add integer casts to math expressions in project '</b>"
+                                  + dbControl.getProjectName()
+                                  + "<b>' (project database will be closed)");
+
+            try
+            {
+                // Revert any changes made to the database
+                dbCommand.rollbackToSavePoint(ccddMain.getMainFrame());
+            }
+            catch (SQLException se)
+            {
+                // Inform the user that rolling back the changes failed
+                eventLog.logFailEvent(ccddMain.getMainFrame(),
+                                      "Cannot revert changes to project; cause '"
+                                      + se.getMessage()
+                                      + "'",
+                                      "<html><b>Cannot revert changes to project");
+            }
+
+            throw new CCDDException();
+        }
+     }
 
     /**********************************************************************************************
      * Patch utility class

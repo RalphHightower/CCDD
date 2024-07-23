@@ -24,6 +24,7 @@
  **************************************************************************************************/
 package CCDD;
 
+import static CCDD.CcddConstants.INTERNAL_TABLE_PREFIX;
 import static CCDD.CcddConstants.MACRO_IDENTIFIER;
 import static CCDD.CcddConstants.SIZEOF_DATATYPE;
 import static CCDD.CcddConstants.TABLE_DESCRIPTION_SEPARATOR;
@@ -1072,6 +1073,25 @@ public class CcddMacroHandler
      *********************************************************************************************/
     protected String[] searchMacroReferences(String macroNames, Component parent)
     {
+        return searchMacroReferences(macroNames, true, parent);
+    }
+
+    /**********************************************************************************************
+     * Get a list containing the search results in the project database for tables that reference
+     * the specified macro name(s). Include references in the custom values table
+     *
+     * @param macroNames            Macro name(s) for which to search, separated by '|'
+     *
+     * @param removeArrayMemberRefs True to remove any references to the macro that appear in an
+     *                              array size column for an array member
+     *
+     * @param parent                GUI component over which to center any error dialog
+     *
+     * @return List containing the search results in the project database for tables that reference
+     *         the specified macro name
+     *********************************************************************************************/
+    protected String[] searchMacroReferences(String macroNames, boolean removeArrayMemberRefs, Component parent)
+    {
         List<String> matches = new ArrayList<String>();
 
         if (!skipSearchingReferences)
@@ -1092,17 +1112,51 @@ public class CcddMacroHandler
         {
             for (String name : names)
             {
-                if (row.contains(name))
+                int column = 0;
+                String columnName = null;
+                String[] tblColTDescAndCntxt = row.split(TABLE_DESCRIPTION_SEPARATOR, 4);
+                String refTableName = tblColTDescAndCntxt[SearchResultsQueryColumn.TABLE.ordinal()];
+                String[] refContext = CcddUtilities.splitAndRemoveQuotes(tblColTDescAndCntxt[SearchResultsQueryColumn.CONTEXT.ordinal()]);
+
+                // Set to true if the referenced table is a prototype table and false if the
+                // reference is to the internal custom values table
+                boolean isPrototype = !refTableName.startsWith(INTERNAL_TABLE_PREFIX);
+
+                // Check if the referenced table is a prototype table
+                if (isPrototype)
                 {
+                    // Get the column name containing the macro reference
+                    columnName = tblColTDescAndCntxt[SearchResultsQueryColumn.COLUMN.ordinal()];
+
+                    // Get the index of the column containing the macro, based on the column name
+                    // and table type definition
+                    String tableType = tblColTDescAndCntxt[SearchResultsQueryColumn.COMMENT.ordinal()].split(",", 2)[1];
+                    TypeDefinition typeDefn = tableTypeHandler.getTypeDefinition(tableType);
+                    column = typeDefn.getColumnIndexByDbName(columnName);
+                }
+                // The reference is in the custom values table
+                else
+                {
+                    // Get the column index containing the macro reference
+                    column = ValuesColumn.VALUE.ordinal();
+                }
+
+                // Check if the column contains the macro
+                if (refContext[column].contains(name))
+                {
+                    // Add the row to the match list
                     matches.add(row);
                     break;
                 }
             }
         }
 
-        // Remove any references to the macro that appear in an array size column for an array
-        // member (the reference in the array's definition is all that's needed)
-        CcddSearchHandler.removeArrayMemberReferences(matches, tableTypeHandler);
+        if (removeArrayMemberRefs)
+        {
+            // Remove any references to the macro that appear in an array size column for an array
+            // member (the reference in the array's definition is all that's needed)
+            CcddSearchHandler.removeArrayMemberReferences(matches, tableTypeHandler);
+        }
 
         return matches.toArray(new String[0]);
     }

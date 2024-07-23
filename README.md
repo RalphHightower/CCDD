@@ -17,6 +17,12 @@ _Note: The master branch contains_ **CCDD version 1**_, which is superseded by_ 
 
 * Beginning with CCDD version 2.1.2 Python 3 is supported
 
+*** Version 2.1.12 has been released **
+
+Below is a brief description of what has changed in version 2.1.12
+* Added patch #07232024 which adds an integer cast to math expressions in tables cells and the macro table that include a macro and a division operator
+* Corrected a bug when restoring a database backup file when the current user is not listed in the DBU file's definition for the __users table
+
 *** Version 2.1.11 has been released **
 
 Below is a brief description of what has changed in version 2.1.11

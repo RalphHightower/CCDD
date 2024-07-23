@@ -872,7 +872,9 @@ public class CcddSearchHandler extends CcddDialogHandler
                 {
                     return;
                 }
+
                 boolean isEqual = refL.equals(refR);
+
                 if (isEqual)
                 {
                     // Separate the location into the individual columns. Commas between double

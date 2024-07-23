@@ -562,6 +562,7 @@ public class CcddFileIOHandler
             boolean inBackupDatabaseInfoTable = false;
             boolean inUsers = false;
             boolean isOwnerAdmin = false;
+            int userRow = 1;
             String line = null;
             String commentText = "";
 
@@ -619,6 +620,8 @@ public class CcddFileIOHandler
                         // Check if this line defines a user's access level
                         if (line.matches("[^\\s]+\\s+.+"))
                         {
+                            ++userRow;
+
                             if (line.matches(projectOwner + "+\\s+.+"))
                             {
                                 // Set the flag to indicate the project owner is already in
@@ -627,7 +630,8 @@ public class CcddFileIOHandler
 
                                 // Make the project owner an administrator for the restored
                                 // project
-                                line.replaceFirst("(.+\\s+).+$", "$1" + AccessLevel.ADMIN.getDisplayName());
+                                line = line.replaceFirst("^(.+\\s+).+(\\s+.+)$",
+                                                         "$1" + AccessLevel.ADMIN.getDisplayName() + "$2");
                             }
                         }
                         // The last user access level definition was reached
@@ -646,6 +650,8 @@ public class CcddFileIOHandler
                                 line = projectOwner
                                        + "\t"
                                        + AccessLevel.ADMIN.getDisplayName()
+                                       + "\t"
+                                       + userRow
                                        + "\n"
                                        + line;
                             }
@@ -3613,15 +3619,10 @@ public class CcddFileIOHandler
                 {
                     List<TableInfo> tableDefs = null;
 
-// TODO
                     if ((fileExtn == FileExtension.JSON) || (fileExtn == FileExtension.CSV))
                     {
                         // Export the formatted tables
                         tableDefs = ioHandler.loadTablesforJsonOrCsvExport(tablePaths);
-
-//                        // Update the progress bar to reflect any additional (prototype) tables
-//                        // added
-//                        ioHandler.setProgressMaximum(tableDefs.size());
                     }
                     else
                     {

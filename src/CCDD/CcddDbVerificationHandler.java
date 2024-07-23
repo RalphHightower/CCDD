@@ -898,9 +898,10 @@ public class CcddDbVerificationHandler
                 // Get the table name
                 dbTableName = tableResult.getString("TABLE_NAME");
 
-                // Check if this is an internal table other than a script file
+                // Check if this is an internal table other than a script or patch file
                 if (dbTableName.startsWith(INTERNAL_TABLE_PREFIX)
-                    && !dbTableName.startsWith(InternalTable.SCRIPT.getTableName()))
+                    && !dbTableName.startsWith(InternalTable.SCRIPT.getTableName())
+                    && !dbTableName.startsWith(InternalTable.PATCH.getTableName()))
                 {
                     boolean isFound = false;
 

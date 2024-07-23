@@ -3474,6 +3474,11 @@ public class CcddConstants
                                 {OrdersColumn.ROW_NUM.columnName, OrdersColumn.ROW_NUM.dataType}},
                 "", ""),
 
+        // Patch tables
+        PATCH("patch_",
+              new String[][] {},
+              "", ""),
+
         // Reserved message IDs
         RESERVED_MSG_IDS("reserved_msg_ids",
                 new String[][] {{ReservedMsgIDsColumn.MSG_ID.columnName, ReservedMsgIDsColumn.MSG_ID.dataType},
