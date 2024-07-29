@@ -114,7 +114,7 @@ public class CcddPatchHandler
 
         String PATCH_07232024_dialogMsg = "<html><b>Apply patch to add integer casts to math "
                                           + "expressions?<br><br></b>"
-                                          + "An integer cast, '(int)', is appplied to math "
+                                          + "An integer cast, '(int)', is applied to math "
                                           + "expressions in tables cells and the macro table "
                                           + "that include a macro and a division operator. This "
                                           + "is in case the expression is used where an integer "
@@ -128,15 +128,18 @@ public class CcddPatchHandler
     /**********************************************************************************************
      * Apply patches based on the input flag
      *
-     * @param stage 1 for patches that must be implemented prior to initializing the handler
-     *              classes, 2 for patches that must be implemented after initializing the handler
-     *              classes, and 3 for patches that must be implemented after creating the project-
-     *              specific PostgreSQL functions
+     * @param stage 0 to create any patch-applied tables when opening a new (empty) database, 1 for
+     *              patches that must be implemented prior to initializing the handler classes, 2
+     *              for patches that must be implemented after initializing the handler classes,
+     *              and 3 for patches that must be implemented after creating the project-specific
+     *              PostgreSQL functions
      *
      * @throws CCDDException If the user elects to not install the patch or an error occurs while
      *                       applying the patch
+     *
+     * @throws SQLException If an error occurs accessing the database or creating a patch table
      *********************************************************************************************/
-    protected void applyPatches(int stage) throws CCDDException
+    protected void applyPatches(int stage) throws CCDDException, SQLException
     {
         // *** NOTE *** NOTE *** NOTE *** NOTE *** NOTE *** NOTE *** NOTE *** NOTE *** NOTE ***
         // Patches are removed after an appropriate amount of time has been given for the patch to
@@ -145,6 +148,16 @@ public class CcddPatchHandler
 
         switch(stage)
         {
+            //Perform any patches to update this project database to the latest schema that must
+            // be implemented prior to creating the functions and internal files
+            case 0:
+                // Patches requiring a patch-applied table:
+                // - Patch #07232024: An integer cast, '(int)', is applied to math expressions in
+                //   tables cells and the macro table
+                String[] patches = {PATCH_07232024};
+                createPatchAppliedTablesInNewDatabase(patches);
+                break;
+
             // Perform any patches to update this project database to the latest schema that must
             // be implemented prior to initializing the handler classes
             case 1:
@@ -155,7 +168,6 @@ public class CcddPatchHandler
                 // Patch #05022023: Update the primary key column input type to 'Non-negative
                 // integer' in the table type definitions
                 updatePrimaryKeyInputType();
-
                 break;
 
             // Perform any patches to update this project database to the latest schema that must
@@ -659,9 +671,9 @@ public class CcddPatchHandler
 
         try
         {
-            // Check if the patch has not already been applied
             String patchTable = InternalTable.PATCH.getTableName() + PATCH_07232024.replace("#", "");
 
+            // Check if the patch has not already been applied
             if (!dbTable.isTableExists(patchTable, ccddMain.getMainFrame()))
             {
                 // Check if the user cancels installing the patch
@@ -830,6 +842,37 @@ public class CcddPatchHandler
             throw new CCDDException();
         }
      }
+
+    /**********************************************************************************************
+     * Create a patch-applied table when opening a new (empty) database for each patch that
+     * requires one
+     *
+     * @param patches Array containing the applicable patch names
+     *
+     * @throws SQLException If an error occurs accessing the database or creating a patch table
+     *********************************************************************************************/
+    private void createPatchAppliedTablesInNewDatabase(String[] patches) throws SQLException
+    {
+        CcddDbCommandHandler dbCommand = ccddMain.getDbCommandHandler();
+
+        // Check if this is a new (empty) database; if so, create the patch table
+        ResultSet result = dbCommand.executeDbQuery(new StringBuilder("SELECT count(*) FROM  pg_stat_user_tables;"),
+                                                    ccddMain.getMainFrame());
+
+        if (result.next() && result.getInt(1) == 0)
+        {
+            for (String patch : patches)
+            {
+                // Add patch applied file to new databases
+                String patchTable = InternalTable.PATCH.getTableName() + patch.replace("#", "");
+
+                // Create the patch table to prevent reapplying the patch
+                dbCommand.executeDbCommand(new StringBuilder("CREATE TABLE ").append(patchTable)
+                                                                             .append(" ();"),
+                                           ccddMain.getMainFrame());
+            }
+        }
+    }
 
     /**********************************************************************************************
      * Patch utility class

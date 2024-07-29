@@ -1632,9 +1632,10 @@ public class CcddDbControlHandler
                 // Reset the command
                 command.setLength(0);
 
-                // Check that this isn't the script table type. The script table is a special type
-                // for storing specific scripts
-                if (intTable != InternalTable.SCRIPT)
+                // Check that this isn't the script or patch table type. The script table is a
+                // special type for storing specific scripts. Patch tables are created when
+                // applying a specific patch or for a new project
+                if (intTable != InternalTable.SCRIPT && intTable != InternalTable.PATCH)
                 {
                     // Check if the internal table doesn't exist
                     if (!ccddMain.getDbTableCommandHandler().isTableExists(intTable.getTableName(),
@@ -2598,6 +2599,12 @@ public class CcddDbControlHandler
                     // (default database)
                     if (isDatabaseConnected())
                     {
+                        // Perform any patches to update this project database to the latest schema
+                        // that must be implemented prior to creating the functions and internal
+                        // tables
+                        CcddPatchHandler patchHandler = new CcddPatchHandler(ccddMain);
+                        patchHandler.applyPatches(0);
+
                         // Create a temporary table for storing the results returned by the
                         // database functions
                         createTemporaryTable();
@@ -2612,7 +2619,6 @@ public class CcddDbControlHandler
 
                         // Perform any patches to update this project database to the latest schema
                         // that must be implemented prior to initializing the handler classes
-                        CcddPatchHandler patchHandler = new CcddPatchHandler(ccddMain);
                         patchHandler.applyPatches(1);
 
                         // Create and set the project-specific handlers that must be created prior
