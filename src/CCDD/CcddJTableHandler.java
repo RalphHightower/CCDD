@@ -1,5 +1,5 @@
-/**************************************************************************************************
- * /** \file CcddJTableHandler.java
+/*************************************************************************************************/
+/** \file CcddJTableHandler.java
  *
  * \author Kevin McCluney Bryan Willis
  *
@@ -1232,6 +1232,15 @@ public abstract class CcddJTableHandler extends JTable
             @Override
             public void focusGained(FocusEvent fe)
             {
+                // Check that the table gained focus without a cell already selected
+                if (table.getRowCount() > 0
+                    && table.getSelectedColumn() == -1
+                    && table.isCellEditable(0, 0))
+                {
+                    // Set the upper left table cell
+                    table.changeSelection(0, 0, false, false);;
+                }
+
                 // Force a repaint so that all cells are highlighted in a row when the table row
                 // gains focus
                 repaint();
@@ -1248,7 +1257,8 @@ public abstract class CcddJTableHandler extends JTable
 
         // Set the initial number of rows to display in the table
         setPreferredScrollableViewportSize(new Dimension(getPreferredSize().width,
-                                                         initialViewableRows * (rowHeight + getRowMargin() * 2 + 4)));
+                                                         initialViewableRows
+                                                         * (rowHeight + getRowMargin() * 2 + 4)));
 
         // Make the table fill the dialog
         setFillsViewportHeight(true);
@@ -1527,7 +1537,8 @@ public abstract class CcddJTableHandler extends JTable
 
                     // Check if this is the same column as for the previous sort and that the
                     // current sort order is descending
-                    if (column == lastColumn && sortKeys.size() > 0
+                    if (column == lastColumn
+                        && sortKeys.size() > 0
                         && sortKeys.get(0).getSortOrder() == SortOrder.DESCENDING)
                     {
                         // Set the sort keys to null to remove the column sort
@@ -1970,7 +1981,8 @@ public abstract class CcddJTableHandler extends JTable
                 // Set the text pane's width to the table column width. This causes the JTextPane
                 // to calculate the height required to show all of the cell's text. Subtract 1 from
                 // the width so that cell text matching the exact width doesn't have text truncated
-                setSize(jtable.getColumnModel().getColumn(column).getWidth() - 1, jtable.getRowHeight(row));
+                setSize(jtable.getColumnModel().getColumn(column).getWidth() - 1,
+                        jtable.getRowHeight(row));
             }
 
             return this;
@@ -2702,15 +2714,15 @@ public abstract class CcddJTableHandler extends JTable
     /**********************************************************************************************
      * Insert a row of data into the table at the selection point and highlight the inserted row
      *
-     * @param endEdit              True to end the editing sequence at the end of the insert for
-     *                             undo/redo purposes
+     * @param endEdit        True to end the editing sequence at the end of the insert for undo/
+     *                       redo purposes
      *
-     * @param insertionPoint       START to insert the data as the new first row in the table; END
-     *                             to force insertion of the new data at the end of the table;
-     *                             SELECTION to insert the data below the currently selected row(s)
+     * @param insertionPoint START to insert the data as the new first row in the table; END to
+     *                       force insertion of the new data at the end of the table; SELECTION to
+     *                       insert the data below the currently selected row(s)
      *
-     * @param data                 Data with which to populate the inserted row; null to insert an
-     *                             empty row
+     * @param data           Data with which to populate the inserted row; null to insert an empty
+     *                       row
      *********************************************************************************************/
     protected void insertRow(boolean endEdit, TableInsertionPoint insertionPoint, Object[] data)
     {
@@ -2730,7 +2742,7 @@ public abstract class CcddJTableHandler extends JTable
      * @param data                 Data with which to populate the inserted row; null to insert an
      *                             empty row
      *
-     * @param highlightInsertedRow True to select (highlight0 the inserted row
+     * @param highlightInsertedRow True to select (highlight) the inserted row
      *********************************************************************************************/
     protected void insertRow(boolean endEdit,
                              TableInsertionPoint insertionPoint,
@@ -2805,7 +2817,9 @@ public abstract class CcddJTableHandler extends JTable
      *
      * @param highlightInsertedRow True to highlight the inserted row
      *********************************************************************************************/
-    protected void setSelectedRowAndColumn(int viewRow, int viewColumn, boolean highlightInsertedRow)
+    protected void setSelectedRowAndColumn(int viewRow,
+                                           int viewColumn,
+                                           boolean highlightInsertedRow)
     {
         // Check if the new row is visible (row filters can make the row invisible)
         if (viewRow != -1 && viewRow < getRowCount())
@@ -3656,7 +3670,11 @@ public abstract class CcddJTableHandler extends JTable
                 {
                     // Adjust the end of the highlighted rows by the number of hidden array members
                     // in the paste data
-                    endRow -= getNumOfHiddenRowsAdded(cellData, tableData, startRow, startColumn, numColumns);
+                    endRow -= getNumOfHiddenRowsAdded(cellData,
+                                                      tableData,
+                                                      startRow,
+                                                      startColumn,
+                                                      numColumns);
                 }
 
                 final int startRowSelect = startRow;
@@ -3708,7 +3726,7 @@ public abstract class CcddJTableHandler extends JTable
         return showMessage == null;
     }
 
-    /**************************************************************************************
+    /**********************************************************************************************
      * Determine the number of hidden rows added to the table when pasting data. This
      * method acts as a placeholder for tables that can have hidden rows
      *
@@ -3723,7 +3741,7 @@ public abstract class CcddJTableHandler extends JTable
      * @param numColumns  Number of columns represented by the cell data array
      *
      * @return The number of rows added to the table that are not visible
-     *************************************************************************************/
+     *********************************************************************************************/
     protected int getNumOfHiddenRowsAdded(Object[] cellData,
                                           List<Object[]> tableData,
                                           int startRow,
@@ -3733,7 +3751,7 @@ public abstract class CcddJTableHandler extends JTable
         return 0;
     }
 
-    /**************************************************************************************
+    /**********************************************************************************************
      * Determine the number of rows added to the table when pasting a cell value. This
      * method acts as a placeholder for tables that can have rows automatically added based
      * on the pasted data
@@ -3743,7 +3761,7 @@ public abstract class CcddJTableHandler extends JTable
      * @param modelColumn Column number (model coordinates) where the cell value is pasted
      *
      * @return The number of rows added to the table due to the pasted value
-     *************************************************************************************/
+     *********************************************************************************************/
     protected int getNumOfRowsAdded(String cellValue, int modelColumn)
     {
         return 0;
@@ -3987,15 +4005,19 @@ public abstract class CcddJTableHandler extends JTable
 
         // Flag that indicates that the cell is in a selected row and that all of the columns in a
         // row should be selected if any cell in the row is selected
-        boolean isSelectedRow = cellSelection == TableSelectionMode.SELECT_BY_ROW && isRowSelected(row);
+        boolean isSelectedRow = cellSelection == TableSelectionMode.SELECT_BY_ROW
+                                && isRowSelected(row);
 
         // Check if this is one of the selected rows (and columns, if column selection is enabled
         // for this table) and, unless selection doesn't depend on having the focus, that the table
         // has the focus; or if the cell is in a selected row and all columns should be selected
-        if (((isFocusOwner() || selectWithoutFocus) && isCellSelected(row, column)) || isSelectedRow)
+        if (((isFocusOwner() || selectWithoutFocus)
+             && isCellSelected(row, column))
+            || isSelectedRow)
         {
             // Set the text (foreground) color for the selected cell(s)
-            comp.setForeground(index == -1 ? ModifiableColorInfo.SELECTED_TEXT.getColor() : rowColor.get(index));
+            comp.setForeground(index == -1 ? ModifiableColorInfo.SELECTED_TEXT.getColor()
+                                           : rowColor.get(index));
 
             // Check if this cell has the focus (last cell selected) and only this cell should be
             // highlighted
@@ -4157,7 +4179,8 @@ public abstract class CcddJTableHandler extends JTable
                 if (isValid)
                 {
                     // Check if the row indices are invalid
-                    if (tme.getFirstRow() >= tableModel.getRowCount() || tme.getLastRow() == Integer.MAX_VALUE)
+                    if (tme.getFirstRow() >= tableModel.getRowCount()
+                        || tme.getLastRow() == Integer.MAX_VALUE)
                     {
                         isValid = false;
                     }

@@ -1,5 +1,5 @@
-/**************************************************************************************************
- * /** \file CcddXTCEHandler.java
+/*************************************************************************************************/
+/** \file CcddXTCEHandler.java
  *
  * \author Kevin McCluney Bryan Willis
  *
@@ -1566,11 +1566,13 @@ public class CcddXTCEHandler extends CcddImportExportSupportHandler implements C
      *                                [3] validation status attribute <br>
      *                                [4] classification attribute
      *
-     * @throws JAXBException If an error occurs marshaling the project
+     * @throws JAXBException    If an error occurs marshaling the project
      *
-     * @throws CCDDException If an error occurs executing an external (script) method
+     * @throws MarshalException If an error occurs marshaling the project
      *
-     * @throws Exception     If an unanticipated error occurs
+     * @throws CCDDException    If an error occurs converting the tables to XTCE
+     *
+     * @throws Exception        If an unanticipated error occurs
      *********************************************************************************************/
     @Override
     public void exportTables(FileEnvVar exportFile,
@@ -1850,7 +1852,7 @@ public class CcddXTCEHandler extends CcddImportExportSupportHandler implements C
      *
      * @return Reference to the new space system
      *
-     * @throws CCDDException If an error occurs executing an external (script) method
+     * @throws CCDDException If an error occurs adding the SpaceSystem
      *********************************************************************************************/
     private SpaceSystemType addSpaceSystem(SpaceSystemType parentSystem,
                                            String tablePath,
@@ -1985,7 +1987,7 @@ public class CcddXTCEHandler extends CcddImportExportSupportHandler implements C
      *
      * @param messageNameAndID Message name and ID; null if not present or not applicable
      *
-     * @throws CCDDException If an error occurs executing an external (script) method
+     * @throws CCDDException If an error occurs adding a SpaceSystem parameter
      *********************************************************************************************/
     protected void addSpaceSystemParameters(SpaceSystemType spaceSystem,
                                             String tableName,
@@ -2086,7 +2088,7 @@ public class CcddXTCEHandler extends CcddImportExportSupportHandler implements C
      *
      * @param arrayDefn   Array of the current array definition row values
      *
-     * @throws CCDDException If an error occurs executing an external (script) method
+     * @throws CCDDException If an error occurs adding a parameter or type
      *********************************************************************************************/
     protected void addParameterAndType(SpaceSystemType spaceSystem,
                                        TypeDefinition typeDefn,
@@ -2221,7 +2223,7 @@ public class CcddXTCEHandler extends CcddImportExportSupportHandler implements C
      * @param stringSize    Size, in characters, of a string parameter; ignored if not a string or
      *                      character
      *
-     * @throws CCDDException If an error occurs executing an external (script) method
+     * @throws CCDDException If an error occurs setting the parameter data type
      *********************************************************************************************/
     protected void setParameterDataType(SpaceSystemType spaceSystem,
                                         String parameterName,
@@ -2843,7 +2845,7 @@ public class CcddXTCEHandler extends CcddImportExportSupportHandler implements C
      *
      * @param parameterName Parameter name
      *
-     * @throws CCDDException If an error occurs executing an external (script) method
+     * @throws CCDDException If an error occurs adding a parameter rate
      *********************************************************************************************/
     private void addParameterRates(SpaceSystemType spaceSystem,
                                    TypeDefinition typeDefn,
@@ -2904,7 +2906,7 @@ public class CcddXTCEHandler extends CcddImportExportSupportHandler implements C
      *
      * @param messageNameAndID Message name and ID; null if not present or not applicable
      *
-     * @throws CCDDException If an error occurs executing an external (script) method
+     * @throws CCDDException If an error occurs adding a SpaceSystem command
      *********************************************************************************************/
     protected void addSpaceSystemCommands(SpaceSystemType spaceSystem,
                                           String[][] tableData,
@@ -2995,7 +2997,7 @@ public class CcddXTCEHandler extends CcddImportExportSupportHandler implements C
      *
      * @param cmdDescription  Description of the command
      *
-     * @throws CCDDException If an error occurs executing an external (script) method
+     * @throws CCDDException If an error occurs adding a command
      *********************************************************************************************/
     protected void addCommand(SpaceSystemType spaceSystem,
                               String commandName,

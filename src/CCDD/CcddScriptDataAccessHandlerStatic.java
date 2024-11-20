@@ -1,5 +1,5 @@
-/**************************************************************************************************
- * /** \file CcddScriptDataAccessHandlerStatic.java
+/*************************************************************************************************/
+/** \file CcddScriptDataAccessHandlerStatic.java
  *
  * \author Kevin McCluney Bryan Willis
  *
@@ -691,6 +691,11 @@ public class CcddScriptDataAccessHandlerStatic
     public static String[][] getMacroDefinitions()
     {
         return accessHandler.getMacroDefinitions();
+    }
+
+    public static String getMacroExpansion(String macroName)
+    {
+        return accessHandler.getMacroExpansion(macroName);
     }
 
     public static void showInformationDialog(String text)

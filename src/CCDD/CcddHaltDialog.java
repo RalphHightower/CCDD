@@ -1,5 +1,5 @@
-/**************************************************************************************************
- * /** \file CcddHaltDialog.java
+/*************************************************************************************************/
+/** \file CcddHaltDialog.java
  *
  * \author Kevin McCluney Bryan Willis
  *
@@ -31,6 +31,10 @@ import java.awt.Graphics;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.Window;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowFocusListener;
+import java.awt.event.WindowListener;
 
 import javax.swing.BorderFactory;
 import javax.swing.JLabel;
@@ -53,6 +57,7 @@ public class CcddHaltDialog extends CcddDialogHandler
     private JProgressBar upperProgBar;
     private JProgressBar lowerProgBar;
     private JLabel textLbl;
+    private Component parent;
 
     // Flag indicating if the operation is canceled by user input
     private boolean isHalted;
@@ -67,12 +72,9 @@ public class CcddHaltDialog extends CcddDialogHandler
 
     // Counters used to calculate the progress bar value
     private int upperProgCount;
-    private int upperPrevProgCount;
     private int upperProgStart;
     private int lowerProgCount;
-    private int lowerPrevProgCount;
     private int lowerProgStart;
-    private Component parent;
 
     /**********************************************************************************************
      * Process cancellation dialog class constructor with a single (optional) progress bar
@@ -414,14 +416,12 @@ public class CcddHaltDialog extends CcddDialogHandler
         upperItemsPerStep = upperNumDivisionPerStep;
         int upperProgMaximum = upperNumSteps * upperNumDivisionPerStep;
         upperProgCount = 0;
-        upperPrevProgCount = 0;
         upperProgStart = 0;
         this.lowerNumDivisionPerStep = lowerNumDivisionPerStep;
         lowerItemsPerStep = lowerNumDivisionPerStep;
         int lowerProgMaximum = lowerNumSteps * lowerNumDivisionPerStep;
         this.parent = parent;
         lowerProgCount = 0;
-        lowerPrevProgCount = 0;
         lowerProgStart = 0;
 
         // Set the initial layout manager characteristics
@@ -494,6 +494,58 @@ public class CcddHaltDialog extends CcddDialogHandler
             dialogPnl.add(lowerProgBar, gbc);
         }
 
+        if (parent instanceof Window)
+        {
+            // Move the halt dialog to the front whenever the parent window is brought to the front
+            WindowFocusListener focusListener = new WindowFocusListener()
+            {
+                /**********************************************************************************
+                 * Handle a parent focus gained event - move the halt dialog to the front
+                 *********************************************************************************/
+                @Override
+                public void windowGainedFocus(WindowEvent we)
+                {
+                    CcddHaltDialog.this.toFront();
+                }
+
+                @Override
+                public void windowLostFocus(WindowEvent arg0) {}
+            };
+
+            // Add a listener for dialog focus gain and lost events
+            ((Window) parent).addWindowFocusListener(focusListener);
+
+            this.addWindowListener(new WindowListener()
+            {
+                @Override
+                public void windowActivated(WindowEvent arg0) {}
+
+                /**********************************************************************************
+                 * Handle a parent close event - remove the focus listener from the parent
+                 *********************************************************************************/
+               @Override
+                public void windowClosed(WindowEvent arg0)
+                {
+                    ((Window) parent).removeWindowFocusListener(focusListener);
+                }
+
+                @Override
+                public void windowClosing(WindowEvent arg0) {}
+
+                @Override
+                public void windowDeactivated(WindowEvent arg0) {}
+
+                @Override
+                public void windowDeiconified(WindowEvent arg0) {}
+
+                @Override
+                public void windowIconified(WindowEvent arg0) {}
+
+                @Override
+                public void windowOpened(WindowEvent arg0) {}
+            });
+        }
+
         // Display the cancellation dialog
         return showOptionsDialog(parent, dialogPnl, title, DialogOption.HALT_OPTION, false, modal);
     }
@@ -526,7 +578,6 @@ public class CcddHaltDialog extends CcddDialogHandler
             {
                 // Initialize the progress counters
                 upperProgCount = 0;
-                upperPrevProgCount = 0;
                 upperProgStart = startValue;
             }
 
@@ -571,20 +622,11 @@ public class CcddHaltDialog extends CcddDialogHandler
                             }
                         }
 
-                        // Step through the progress count values beginning with the last one
-                        // processed
-                        for (int count = upperPrevProgCount + 1; count <= upperProgCount; count++)
-                        {
-                            // Update the progress bar
-                            upperProgBar.setValue(upperProgStart + (count * upperNumDivisionPerStep / upperItemsPerStep));
-                            upperProgBar.update(gCont);
-                        }
-
-                        // Store the last processed progress counter value
-                        upperPrevProgCount = upperProgCount;
-
-                        // Redraw the halt dialog
-                        update(getGraphics());
+                        // Update the progress bar
+                        upperProgBar.setValue(upperProgStart
+                                              + (upperProgCount
+                                                 * upperNumDivisionPerStep
+                                                 / upperItemsPerStep));
                     }
                 }
             });
@@ -619,7 +661,6 @@ public class CcddHaltDialog extends CcddDialogHandler
             {
                 // Initialize the progress counters
                 lowerProgCount = 0;
-                lowerPrevProgCount = 0;
                 lowerProgStart = startValue;
             }
 
@@ -664,20 +705,11 @@ public class CcddHaltDialog extends CcddDialogHandler
                             }
                         }
 
-                        // Step through the progress count values beginning with the last one
-                        // processed
-                        for (int count = lowerPrevProgCount + 1; count <= lowerProgCount; count++)
-                        {
-                            // Update the progress bar
-                            lowerProgBar.setValue(lowerProgStart + (count * lowerNumDivisionPerStep / lowerItemsPerStep));
-                            lowerProgBar.update(gCont);
-                        }
-
-                        // Store the last processed progress counter value
-                        lowerPrevProgCount = lowerProgCount;
-
-                        // Redraw the halt dialog
-                        update(getGraphics());
+                        // Update the progress bar
+                        lowerProgBar.setValue(lowerProgStart
+                                              + (lowerProgCount
+                                                 * lowerNumDivisionPerStep
+                                                 / lowerItemsPerStep));
                     }
                 }
             });

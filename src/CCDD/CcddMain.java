@@ -1,5 +1,5 @@
-/**************************************************************************************************
- * /** \file CcddMain.java
+/*************************************************************************************************/
+/** \file CcddMain.java
  *
  * \author Kevin McCluney Bryan Willis
  *
@@ -361,7 +361,8 @@ public class CcddMain
         // Log the CCDD and Java versions
         getSessionEventLog().logEvent(EventLogMessageType.STATUS_MSG,
                                       new StringBuilder("CCDD: ").append(ccddVersion)
-                                                                 .append(" (").append(buildDate)
+                                                                 .append(" (")
+                                                                 .append(buildDate)
                                                                  .append(")  ***  Java: ")
                                                                  .append(System.getProperty("java.version"))
                                                                  .append(" (")
@@ -952,7 +953,7 @@ public class CcddMain
         // Build the variables list and determine the variable offsets (note that the variables
         // class must be fully instantiated and the macro handler updated with the variable handler
         // reference before calling the path and offset list build method)
-        variableHandler.buildPathAndOffsetLists(); // CAN THIS BE DONE IN BACKGROUND?
+        variableHandler.buildPathAndOffsetLists();
 
         // Build the command information list
         commandHandler.buildCommandList();
@@ -1721,7 +1722,8 @@ public class CcddMain
                     // Create the new recently opened project menu item
                     mntmRecentProjects[index] = createMenuItem(mnRecentProjects,
                                                                (index + 1) + " " + recentProjectNames.get(index),
-                                                               KeyEvent.VK_1 + (index == 9 ? -1 : index), 1,
+                                                               KeyEvent.VK_1 + (index == 9 ? -1 : index),
+                                                               1,
                                                                "Open project " + recentProjectNames.get(index));
 
                     // Add a listener for the recently opened project menu item
@@ -3416,7 +3418,7 @@ public class CcddMain
             {
                 // Inform the user that the input value is invalid
                 new CcddDialogHandler().showMessageDialog(dialog,
-                                                          "<html><b>The scale factor value for "
+                                                          "<html><b>The font scale factor value "
                                                           + "must be between 0.1 and 25 (inclusive)",
                                                           "Invalid Input",
                                                           JOptionPane.WARNING_MESSAGE,

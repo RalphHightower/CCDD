@@ -1,5 +1,5 @@
-/**************************************************************************************************
- * /** \file CcddClassesComponent.java
+/*************************************************************************************************/
+/** \file CcddClassesComponent.java
  *
  * \author Kevin McCluney Bryan Willis
  *
@@ -508,7 +508,7 @@ public class CcddClassesComponent
         }
 
         /******************************************************************************************
-         * Enable text matching in the combo box. When enabled, iIn addition to selecting an item
+         * Enable text matching in the combo box. When enabled, in addition to selecting an item
          * directly from the list, the user may type in one or more characters to constrain the
          * list to those items that match the text entered. Wild card characters are allowed: a '?'
          * matches a single character and a '*' matches one or more characters. Trailing characters
@@ -2686,8 +2686,8 @@ public class CcddClassesComponent
                                                         ModifiableSpacingInfo.LABEL_VERTICAL_SPACING.getSpacing() / 2,
                                                         0);
             borderFld = BorderFactory.createCompoundBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED,
-                                                                          Color.LIGHT_GRAY,
-                                                                          Color.GRAY),
+                                                                                           Color.LIGHT_GRAY,
+                                                                                           Color.GRAY),
                                                            BorderFactory.createEmptyBorder(ModifiableSpacingInfo.INPUT_FIELD_PADDING.getSpacing(),
                                                                                            ModifiableSpacingInfo.INPUT_FIELD_PADDING.getSpacing(),
                                                                                            ModifiableSpacingInfo.INPUT_FIELD_PADDING.getSpacing(),

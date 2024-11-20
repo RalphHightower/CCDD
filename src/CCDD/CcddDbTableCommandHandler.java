@@ -1,5 +1,5 @@
-/**************************************************************************************************
- * /** \file CcddDbTableCommandHandler.java
+/*************************************************************************************************/
+/** \file CcddDbTableCommandHandler.java
  *
  * \author Kevin McCluney Bryan Willis
  *
@@ -78,6 +78,7 @@ import CCDD.CcddConstants.DatabaseObject;
 import CCDD.CcddConstants.DefaultColumn;
 import CCDD.CcddConstants.DefaultInputType;
 import CCDD.CcddConstants.DialogOption;
+import CCDD.CcddConstants.EventLogMessageType;
 import CCDD.CcddConstants.FieldEditorColumnInfo;
 import CCDD.CcddConstants.InputTypeFormat;
 import CCDD.CcddConstants.InternalTable;
@@ -121,6 +122,7 @@ public class CcddDbTableCommandHandler
     private CcddVariableHandler variableHandler;
     private CcddCommandHandler commandHandler;
     private CcddInputTypeHandler inputTypeHandler;
+    private CcddHaltDialog haltDlg;
 
     // Flag that indicates a variable has been added to a link definition and the links table
     // should be updated
@@ -146,7 +148,7 @@ public class CcddDbTableCommandHandler
     private List<TableMembers> preLoadedTableMembers;
 
     // Table tree
-    CcddTableTreeHandler tableTree;
+    private CcddTableTreeHandler tableTree;
 
     // Characters used to create a unique delimiter for literal strings stored in the database
     private final static String DELIMITER_CHARACTERS = "_ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
@@ -3021,6 +3023,7 @@ public class CcddDbTableCommandHandler
                                 true,
                                 true,
                                 false,
+                                true,
                                 parent);
 
                 // Update the table tree
@@ -3063,12 +3066,14 @@ public class CcddDbTableCommandHandler
      *                           reference to the current data type handler) if the change does not
      *                           originate from the data type editor
      *
-     * @param updateListsAndRefs Should lists and references be updated?
+     * @param updateListsAndRefs True to update the lists and references
      *
-     * @param isRootTable        Does the tableInfo belong to a root table? If 'updateListsAndRefs'
-     *                           is true then it does not matter what value this is set to.
+     * @param isRootTable        True if tableInfo belongs to a root table. Ignored if
+     *                           updateListsAndRefs is true
      *
-     * @param ignoreErrors       Should errors be ignored
+     * @param ignoreErrors       True if errors should be ignored
+     *
+     * @param showProgress       True to display the progress/cancellation dialog
      *
      * @param parent             GUI component over which to center any error dialog
      *
@@ -3087,12 +3092,28 @@ public class CcddDbTableCommandHandler
                                       boolean updateListsAndRefs,
                                       boolean isRootTable,
                                       boolean ignoreErrors,
+                                      boolean showProgress,
                                       Component parent)
     {
         boolean errorFlag = false;
         ReferenceCheckResults msgIDRefChk = null;
         boolean isRefFieldChange = false;
         boolean isStructure = false;
+
+        if (showProgress)
+        {
+            // Create the table update progress/cancellation dialog
+            haltDlg = new CcddHaltDialog("Update Table",
+                                         "Preparing to update table '</b>"
+                                         + tableInfo.getTablePath()
+                                         + "<b>'",
+                                         "update",
+                                         1,
+                                         additions.size()
+                                         + modifications.size()
+                                         + deletions.size(),
+                                         parent);
+        }
 
         try
         {
@@ -3371,6 +3392,11 @@ public class CcddDbTableCommandHandler
                                   + "<b>'");
             errorFlag = true;
         }
+        catch (CCDDException ce)
+        {
+            // User elected to cancel the update
+            errorFlag = true;
+        }
         catch (Exception e)
         {
             // Display a dialog providing details on the unanticipated error
@@ -3447,6 +3473,25 @@ public class CcddDbTableCommandHandler
                                       + "'",
                                       "<html><b>Cannot revert changes to project");
             }
+        }
+
+        // Check if the update progress dialog is present
+        if (haltDlg != null)
+        {
+            // Check if the user didn't cancel updating
+            if (!haltDlg.isHalted())
+            {
+                // Close the dialog
+                haltDlg.closeDialog();
+            }
+            // Table update was canceled
+            else
+            {
+                eventLog.logEvent(EventLogMessageType.STATUS_MSG,
+                                  new StringBuilder("Table update terminated by user"));
+            }
+
+            haltDlg = null;
         }
 
         return errorFlag;
@@ -3794,9 +3839,11 @@ public class CcddDbTableCommandHandler
      *
      * @param parent             GUI component over which to center any error dialog
      *
-     * @return True a command is sent to modify the database
+     * @return True if a command is sent to modify the database
      *
-     * @throws SQLException If a database command fails to execute
+     * @throws SQLException  If a database command fails to execute
+     *
+     * @throws CCDDException If the user halts updating the table
      *********************************************************************************************/
     private boolean buildAndExecuteAdditionCommand(TableInfo tableInfo,
                                                    List<TableModification> additions,
@@ -3804,7 +3851,8 @@ public class CcddDbTableCommandHandler
                                                    TypeDefinition typeDefn,
                                                    boolean skipInternalTables,
                                                    boolean ignoreErrors,
-                                                   Component parent) throws SQLException
+                                                   Component parent) throws SQLException,
+                                                                            CCDDException
     {
         boolean isCommandSent = false;
 
@@ -3821,6 +3869,17 @@ public class CcddDbTableCommandHandler
         StringBuilder linksDelCmd = new StringBuilder();
         StringBuilder tlmDelCmd = new StringBuilder();
         List<String> removedDataTypes = new ArrayList<String>();
+
+        // Check if the halt dialog is active
+        if (haltDlg != null)
+        {
+            haltDlg.setLabel("Adding row"
+                             + (additions.size() == 1 ? ""
+                                                      : "s")
+                             + " to table '</b>"
+                             + tableInfo.getTablePath()
+                             + "<b>'");
+        }
 
         // Retrieve the largest key value in the database for this particular table and then add 1
         // to it. This will be the value used for the next insertion to keep them unique
@@ -3845,6 +3904,19 @@ public class CcddDbTableCommandHandler
         // Step through each addition
         for (TableModification add : additions)
         {
+            // Check if the halt dialog is active
+            if (haltDlg != null)
+            {
+                // Check if the user canceled table updating
+                if (haltDlg.isHalted())
+                {
+                    throw new CCDDException();
+                }
+
+                // Update the progress bar
+                haltDlg.updateProgressBar(null);
+            }
+
             // Check if the length of the command string has reached the limit
             if (addCmd.length() >= ModifiableSizeInfo.MAX_SQL_COMMAND_LENGTH.getSize())
             {
@@ -4135,9 +4207,11 @@ public class CcddDbTableCommandHandler
      *
      * @param parent             GUI component over which to center any error dialog
      *
-     * @return True a command is sent to modify the database
+     * @return True if a command is sent to modify the database
      *
-     * @throws SQLException If a database command fails to execute
+     * @throws SQLException  If a database command fails to execute
+     *
+     * @throws CCDDException If the user halts updating the table
      *********************************************************************************************/
     private boolean buildAndExecuteModificationCommand(TableInfo tableInfo,
                                                        List<TableModification> modifications,
@@ -4148,9 +4222,21 @@ public class CcddDbTableCommandHandler
                                                        boolean skipInternalTables,
                                                        ReferenceCheckResults varRefChkResults,
                                                        ReferenceCheckResults cmdRefChkResults,
-                                                       Component parent) throws SQLException
+                                                       Component parent) throws SQLException,
+                                                                                CCDDException
     {
         boolean isCommandSent = false;
+
+        // Check if the halt dialog is active
+        if (haltDlg != null)
+        {
+            haltDlg.setLabel("Modifying row"
+                             + (modifications.size() == 1 ? ""
+                                                          : "s")
+                             + " in table '</b>"
+                             + tableInfo.getTablePath()
+                             + "<b>'");
+        }
 
         StringBuilder modCmd = new StringBuilder();
         StringBuilder valuesModCmd = new StringBuilder();
@@ -4247,6 +4333,19 @@ public class CcddDbTableCommandHandler
         for (TableModification mod : modifications)
         {
             boolean wasShifted = false;
+
+            // Check if the halt dialog is active
+            if (haltDlg != null)
+            {
+                // Check if the user canceled table updating
+                if (haltDlg.isHalted())
+                {
+                    throw new CCDDException();
+                }
+
+                // Update the progress bar
+                haltDlg.updateProgressBar(null);
+            }
 
             // Check if this is a prototype table (modifications are made to the table)
             if (tableInfo.isPrototype())
@@ -5450,9 +5549,11 @@ public class CcddDbTableCommandHandler
      *
      * @param parent             GUI component over which to center any error dialog
      *
-     * @return True a command is sent to modify the database
+     * @return True if a command is sent to modify the database
      *
-     * @throws SQLException If a database command fails to execute
+     * @throws SQLException  If a database command fails to execute
+     *
+     * @throws CCDDException If the user halts updating the table
      *********************************************************************************************/
     private boolean buildAndExecuteDeletionCommand(TableInfo tableInfo,
                                                    List<TableModification> deletions,
@@ -5461,9 +5562,21 @@ public class CcddDbTableCommandHandler
                                                    boolean skipInternalTables,
                                                    ReferenceCheckResults varRefChkResults,
                                                    ReferenceCheckResults cmdRefChkResults,
-                                                   Component parent) throws SQLException
+                                                   Component parent) throws SQLException,
+                                                                            CCDDException
     {
         boolean isCommandSent = false;
+
+        // Check if the halt dialog is active
+        if (haltDlg != null)
+        {
+            haltDlg.setLabel("Deleting row"
+                             + (deletions.size() == 1 ? ""
+                                                      : "s")
+                             + " from table '</b>"
+                             + tableInfo.getTablePath()
+                             + "<b>'");
+        }
 
         // StringBuilders used to hold the values of the various commands being built
         StringBuilder delCmd = new StringBuilder();
@@ -5478,6 +5591,19 @@ public class CcddDbTableCommandHandler
         // Step through each deletion
         for (TableModification del : deletions)
         {
+            // Check if the halt dialog is active
+            if (haltDlg != null)
+            {
+                // Check if the user canceled table updating
+                if (haltDlg.isHalted())
+                {
+                    throw new CCDDException();
+                }
+
+                // Update the progress bar
+                haltDlg.updateProgressBar(null);
+            }
+
             // Add the table row deletion command
             delCmd.append("DELETE FROM ")
                   .append(dbTableName)
@@ -6916,14 +7042,16 @@ public class CcddDbTableCommandHandler
      *
      * @param parent             GUI component over which to center any error dialog
      *
-     * @return Message name and ID cells and fields update command
+     * @return True if the message name and ID cells and fields update command succeeds
+     *
+     * @throws CCDDException If the user halts updating the table
      *********************************************************************************************/
     private boolean updateMessageNameAndIDReference(TableInfo tableInfo,
                                                     TypeDefinition typeDefn,
                                                     List<TableModification> modifications,
                                                     List<TableModification> deletions,
                                                     ReferenceCheckResults msgIDRefChkResults,
-                                                    Component parent)
+                                                    Component parent) throws CCDDException
     {
         boolean result = false;
 
@@ -6934,7 +7062,16 @@ public class CcddDbTableCommandHandler
             // Check if any table column or data field uses the message name & ID input type
             if (!msgIDRefChkResults.getReferences().isEmpty() || msgIDRefChkResults.isFieldUsesType())
             {
-                // Create storage for the lists of names and IDs before and after the change is applied
+                // Check if the halt dialog is active
+                if (haltDlg != null)
+                {
+                    haltDlg.setLabel("Updating message ID references in table '</b>"
+                                     + tableInfo.getTablePath()
+                                     + "<b>'");
+                }
+
+                // Create storage for the lists of names and IDs before and after the change is
+                // applied
                 List<String> msgNameIDs = new ArrayList<String>();
                 List<String> newMsgNameIDs = new ArrayList<String>();
 
@@ -6945,6 +7082,16 @@ public class CcddDbTableCommandHandler
                 for (int row = 0; row < tableInfo.getData().size(); row++)
                 {
                     boolean isModDel = false;
+
+                    // Check if the halt dialog is active
+                    if (haltDlg != null)
+                    {
+                        // Check if the user canceled table updating
+                        if (haltDlg.isHalted())
+                        {
+                            throw new CCDDException();
+                        }
+                    }
 
                     // Step through each row modification
                     for (TableModification mod : modifications)
@@ -6978,7 +7125,8 @@ public class CcddDbTableCommandHandler
                                 // Step through each message name and ID column
                                 for (Integer nameCol : msgColumns)
                                 {
-                                    // Store the original message name and a blank as the updated name
+                                    // Store the original message name and a blank as the updated
+                                    // name
                                     msgNameIDs.add(del.getRowData()[nameCol].toString());
                                     newMsgNameIDs.add("");
                                 }
@@ -7012,8 +7160,8 @@ public class CcddDbTableCommandHandler
                     // Check if the field's input type is for a message name
                     if (fieldInfo.getInputType().equals(nameType))
                     {
-                        // Get the reference to the field in the field handler. This has the field's
-                        // original value
+                        // Get the reference to the field in the field handler. This has the
+                        //  field'soriginal value
                         FieldInformation fldInfo = fieldHandler.getFieldInformationByInputType(fieldInfo.getOwnerName(),
                                                                                                nameType);
 
@@ -7026,10 +7174,21 @@ public class CcddDbTableCommandHandler
                 // Step through the lists of message names and IDs
                 for (int index = 0; index < msgNameIDs.size(); index++)
                 {
+                    // Check if the halt dialog is active
+                    if (haltDlg != null)
+                    {
+                        // Check if the user canceled table updating
+                        if (haltDlg.isHalted())
+                        {
+                            throw new CCDDException();
+                        }
+                    }
+
                     // Check if the message name and ID isn't blank
                     if (!msgNameIDs.get(index).isEmpty())
                     {
-                        // Separate the message name and ID in the original and updated name/ID string
+                        // Separate the message name and ID in the original and updated name/ID
+                        // string
                         String[] nameAndID = CcddMessageIDHandler.getMessageNameAndID(msgNameIDs.get(index));
                         String[] newNameAndID = CcddMessageIDHandler.getMessageNameAndID(newMsgNameIDs.get(index));
 
@@ -7038,8 +7197,8 @@ public class CcddDbTableCommandHandler
                                                                                .append(nameAndID[1])
                                                                                .append(", owner: ")
                                                                                .append(tableInfo.getTablePath())
-                                                                                .append(")")
-                                                                                .toString();
+                                                                               .append(")")
+                                                                               .toString();
                         String newMsgNameIDOwner = newMsgNameIDs.get(index).isEmpty() ? ""
                                                                                       : newNameAndID[0]
                                                                                         + " (ID: "
@@ -7460,7 +7619,6 @@ public class CcddDbTableCommandHandler
                     // references in the telemetry scheduler table
                     storeNonTableTypesInfoTable(intTable, tableData, tableComment, parent);
                     command.append(deleteTlmPathRefs(invalidLinkVars));
-
                     break;
 
                 case TABLE_TYPES:
@@ -7469,9 +7627,8 @@ public class CcddDbTableCommandHandler
                     break;
 
                 case VALUES:
-                    break;
-
                 case DBU_INFO:
+                case PATCH:
                     break;
             }
 
@@ -7584,6 +7741,7 @@ public class CcddDbTableCommandHandler
             case TABLE_TYPES:
             case DBU_INFO:
             case VALUES:
+            case PATCH:
                 break;
         }
     }
@@ -10439,6 +10597,7 @@ public class CcddDbTableCommandHandler
                                     true,
                                     true,
                                     false,
+                                    true,
                                     dialog))
                 {
                     throw new CCDDException("table modification error");
@@ -10526,7 +10685,8 @@ public class CcddDbTableCommandHandler
                 // Inform the user that rolling back the changes failed
                 eventLog.logFailEvent(dialog,
                                       "Cannot revert changes to project; cause '"
-                                      + se.getMessage() + "'",
+                                      + se.getMessage()
+                                      + "'",
                                       "<html><b>Cannot revert changes to project");
             }
         }
@@ -10867,6 +11027,7 @@ public class CcddDbTableCommandHandler
                                             true,
                                             true,
                                             false,
+                                            true,
                                             dialog))
                         {
                             throw new SQLException("table modification error");

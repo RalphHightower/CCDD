@@ -1,5 +1,5 @@
-/**************************************************************************************************
- * /** \file CcddTableEditorHandler.java
+/*************************************************************************************************/
+/** \file CcddTableEditorHandler.java
  *
  * \author Kevin McCluney Bryan Willis
  *
@@ -258,7 +258,9 @@ public class CcddTableEditorHandler extends CcddInputFieldPanelHandler
         this.newDataTypeHandler = newDataTypeHandler;
         this.newMacroHandler = newMacroHandler;
         this.editorDialog = editorDialog;
-        this.parent = parent == null ? (ccddMain.isGUIHidden() ? null : ccddMain.getMainFrame()) : parent;
+        this.parent = parent == null ? (ccddMain.isGUIHidden() ? null
+                                                               : ccddMain.getMainFrame())
+                                     : parent;
 
         // Create references to shorten subsequent calls
         dbTable = ccddMain.getDbTableCommandHandler();
@@ -565,7 +567,11 @@ public class CcddTableEditorHandler extends CcddInputFieldPanelHandler
                 if (value.matches("(^|.+,)" + oldPrototype + "(\\..+|,.+|$)"))
                 {
                     // Update the variable reference using the new prototype name
-                    value = value.replaceAll("(^|,)" + oldPrototype + "(\\.|,|$)", "$1" + newPrototype + "$2");
+                    value = value.replaceAll("(^|,)"
+                                             + oldPrototype
+                                             + "(\\.|,|$)", "$1"
+                                             + newPrototype
+                                             + "$2");
 
                     // Replace the data type with the new data type name. Treat the update as
                     // having been committed to the database
@@ -586,7 +592,9 @@ public class CcddTableEditorHandler extends CcddInputFieldPanelHandler
 
         // Set the name of the table editor's owner
         setOwnerName(name.equals(currentTableInfo.getRootTable()) ? name
-                                                                  : currentTableInfo.getRootTable() + ": " + name);
+                                                                  : currentTableInfo.getRootTable()
+                                                                    + ": "
+                                                                    + name);
 
         // Check that the table is open in a table editor (versus open for a macro name and/or
         // value change, for example)
@@ -638,7 +646,9 @@ public class CcddTableEditorHandler extends CcddInputFieldPanelHandler
                                                          + currentTableInfo.getTablePath());
 
         // Create the indentation text; hide this text by coloring it the same as the background
-        String indent = "<br>" + CcddUtilities.colorHTMLText(pathTag, ModifiableColorInfo.TOOL_TIP_BACK.getColor())
+        String indent = "<br>"
+                        + CcddUtilities.colorHTMLText(pathTag,
+                                                      ModifiableColorInfo.TOOL_TIP_BACK.getColor())
                         + "&#160;&#160;";
 
         // Step through each member in the table path
@@ -751,7 +761,8 @@ public class CcddTableEditorHandler extends CcddInputFieldPanelHandler
 
                 // Check that the variable name and data type are present, the variable path isn't
                 // manually set, and this isn't an array definition
-                if (!variableName.isEmpty() && !dataType.isEmpty()
+                if (!variableName.isEmpty()
+                    && !dataType.isEmpty()
                     && (committedTableInfo.getData().size() == 0
                         || (row < committedTableInfo.getData().size()
                             && committedTableInfo.getData().get(row)[variablePathIndex].toString().isEmpty()))
@@ -760,7 +771,10 @@ public class CcddTableEditorHandler extends CcddInputFieldPanelHandler
                 {
                     // Build the variable path and store it in the table model's variable path
                     // column
-                    tableModel.setValueAt(getVariablePath(variableName, dataType, true), row, variablePathIndex, false);
+                    tableModel.setValueAt(getVariablePath(variableName, dataType, true),
+                                          row,
+                                          variablePathIndex,
+                                          false);
                 }
             }
         }
@@ -1537,7 +1551,8 @@ public class CcddTableEditorHandler extends CcddInputFieldPanelHandler
                     int modelColumn = convertColumnIndexToModel(column);
 
                     // Check if the cell is editable
-                    isEditable = isDataAlterable(((List<?>) tableModel.getDataVector().elementAt(modelRow)).toArray(new Object[0]),
+                    isEditable = isDataAlterable(((List<?>) tableModel.getDataVector()
+                                                                      .elementAt(modelRow)).toArray(new Object[0]),
                                                  modelRow,
                                                  modelColumn);
                 }
@@ -1583,7 +1598,8 @@ public class CcddTableEditorHandler extends CcddInputFieldPanelHandler
                     }
 
                     // Flag that is true if the row represents an array definition
-                    boolean isArrayDefinition = arraySizeIndex != -1 && variableNameIndex != -1
+                    boolean isArrayDefinition = arraySizeIndex != -1
+                                                && variableNameIndex != -1
                                                 && !rowCopy[arraySizeIndex].toString().isEmpty()
                                                 && !ArrayVariable.isArrayMember(rowCopy[variableNameIndex]);
 
@@ -1619,15 +1635,18 @@ public class CcddTableEditorHandler extends CcddInputFieldPanelHandler
                         // This is the bit length cell and either the array size is present or the data
                         // type is not an integer (signed or unsigned)
                         || (column == bitLengthIndex
-                            && ((arraySizeIndex != -1 && !rowCopy[arraySizeIndex].toString().isEmpty())
+                            && ((arraySizeIndex != -1
+                                 && !rowCopy[arraySizeIndex].toString().isEmpty())
                                 || (dataTypeIndex != -1
                                     && !dataTypeHandler.isInteger(rowCopy[dataTypeIndex].toString()))))
 
                         // This is the array size cell and either no variable name is present or a bit
                         // length is present
                         || (column == arraySizeIndex
-                            && ((variableNameIndex != -1 && rowCopy[variableNameIndex].toString().isEmpty())
-                                || (bitLengthIndex != -1 && !rowCopy[bitLengthIndex].toString().isEmpty())))
+                            && ((variableNameIndex != -1
+                                 && rowCopy[variableNameIndex].toString().isEmpty())
+                                || (bitLengthIndex != -1
+                                    && !rowCopy[bitLengthIndex].toString().isEmpty())))
 
                         // This is a rate cell, and a data type exists that is not a primitive
                         || (rateIndex.contains(column)
@@ -1645,7 +1664,8 @@ public class CcddTableEditorHandler extends CcddInputFieldPanelHandler
 
                         // This is the variable path column and the path is empty. This is the case for
                         // variables in a non-root prototype structure
-                        || (column == variablePathIndex && rowCopy[variablePathIndex].toString().isEmpty()))
+                        || (column == variablePathIndex
+                            && rowCopy[variablePathIndex].toString().isEmpty()))
                     {
                         // Set the flag to prevent altering the data value
                         isAlterable = false;
@@ -1679,7 +1699,8 @@ public class CcddTableEditorHandler extends CcddInputFieldPanelHandler
                                 if (dataTypeIndex != -1
                                     && (rowCopy[dataTypeIndex].toString().isEmpty()
                                         || !dataTypeHandler.isPrimitive(rowCopy[dataTypeIndex].toString()))
-                                    && (column == minMax.getMinimum() || column == minMax.getMaximum()))
+                                    && (column == minMax.getMinimum()
+                                        || column == minMax.getMaximum()))
                                 {
                                     // Set the flag to prevent altering the data value and stop
                                     // searching
@@ -1734,7 +1755,8 @@ public class CcddTableEditorHandler extends CcddInputFieldPanelHandler
                     {
                         // Check if the column for which the cell editor is requested is a data
                         // type column, and that the associated enumeration cell isn't blank
-                        if (modelColumn == colGrp.getDataType() && colGrp.getEnumeration() != -1
+                        if (modelColumn == colGrp.getDataType()
+                            && colGrp.getEnumeration() != -1
                             && !getExpandedValueAt(modelRow, colGrp.getEnumeration()).isEmpty())
                         {
                             // Select the combo box cell editor that displays only integer data
@@ -2822,7 +2844,8 @@ public class CcddTableEditorHandler extends CcddInputFieldPanelHandler
                             || (rowDelta > 0 && modelEndRow < tableModel.getRowCount() - 1))
                         {
                             // Get the array size column value for the target row
-                            String arraySize = getExpandedValueAt((rowDelta < 0 ? modelStartRow : modelEndRow)
+                            String arraySize = getExpandedValueAt((rowDelta < 0 ? modelStartRow
+                                                                                : modelEndRow)
                                                                   + rowDelta,
                                                                   arraySizeIndex);
 
@@ -3097,8 +3120,8 @@ public class CcddTableEditorHandler extends CcddInputFieldPanelHandler
             {
                 boolean isExpand = false;
 
-                // Check if the table is allowed to contain arrays, and the arrays are not expanded (the
-                // members are hidden)
+                // Check if the table is allowed to contain arrays, and the arrays are not expanded
+                // (the members are hidden)
                 if (isCanHaveArrays() && !isShowArrayMembers)
                 {
                     isExpand = true;
@@ -3346,7 +3369,7 @@ public class CcddTableEditorHandler extends CcddInputFieldPanelHandler
                         // Step through each array size
                         for (int index = arraySizeIndex - startColumn; index < cellData.length; index += numColumns, startRow++)
                         {
-                            //Check if the row represents an array member
+                            // Check if the row represents an array member
                             if (ArrayVariable.isArrayMember(tableData.get(startRow)[variableNameIndex]))
                             {
                                 // This row is hidden; increment the hidden row counter
@@ -3816,7 +3839,8 @@ public class CcddTableEditorHandler extends CcddInputFieldPanelHandler
 
             // Check that the data type isn't a primitive (i.e., it's a structure) and that this
             // isn't an array definition row
-            if (!dataTypeHandler.isPrimitive(dataType) && isCanHaveArrays()
+            if (!dataTypeHandler.isPrimitive(dataType)
+                && isCanHaveArrays()
                 && (ArrayVariable.isArrayMember(getExpandedValueAt(modelRow, variableNameIndex))
                     || getExpandedValueAt(modelRow, arraySizeIndex).isEmpty()))
             {
@@ -3826,7 +3850,8 @@ public class CcddTableEditorHandler extends CcddInputFieldPanelHandler
                 String arraySize = getExpandedValueAt(modelRow, arraySizeIndex);
 
                 // Get the number of rows that have been committed to the database for this table
-                int numCommitted = committedTableInfo != null ? committedTableInfo.getData().size() : 0;
+                int numCommitted = committedTableInfo != null ? committedTableInfo.getData().size()
+                                                              : 0;
 
                 // Step through each row in the committed version of the table data
                 for (int comRow = 0; comRow < numCommitted; comRow++)
@@ -3849,8 +3874,12 @@ public class CcddTableEditorHandler extends CcddInputFieldPanelHandler
                                 || dbTable.isRootStructure(currentTableInfo.getTablePath()))
                             {
                                 // Load the selected child table's data into a table editor
-                                dbTable.loadTableDataInBackground(currentTableInfo.getTablePath() + "," + dataType + "."
-                                                                  + variableName, editorDialog);
+                                dbTable.loadTableDataInBackground(currentTableInfo.getTablePath()
+                                                                  + ","
+                                                                  + dataType
+                                                                  + "."
+                                                                  + variableName,
+                                                                  editorDialog);
                             }
                             // The selection is a child of a prototype, and the prototype isn't a
                             // top-level (root) structure
@@ -3888,7 +3917,8 @@ public class CcddTableEditorHandler extends CcddInputFieldPanelHandler
         else
         {
             // Get the number of rows that have been committed to the database for this table
-            int numCommitted = committedTableInfo != null ? committedTableInfo.getData().size() : 0;
+            int numCommitted = (committedTableInfo != null) ? committedTableInfo.getData().size()
+                                                            : 0;
 
             // Get the row's primary key, variable name, and array size
             String rowPrimaryKey = tableModel.getValueAt(modelRow, primaryKeyIndex).toString();
@@ -4196,7 +4226,9 @@ public class CcddTableEditorHandler extends CcddInputFieldPanelHandler
                         if (index != -1)
                         {
                             // Step through each ancestor prototype name in the variable path
-                            for (String ancestorPrototype : variablePath.substring(0, index).replaceAll("\\.[^,]+", "").split(","))
+                            for (String ancestorPrototype : variablePath.substring(0, index)
+                                                                        .replaceAll("\\.[^,]+", "")
+                                                                        .split(","))
                             {
                                 // Check if the prototype name isn't already in the list
                                 if (!invalidDataTypes.contains(ancestorPrototype))
@@ -4554,7 +4586,8 @@ public class CcddTableEditorHandler extends CcddInputFieldPanelHandler
                 {
                     // Hide the row if it represents an array member and the display flag is false;
                     // otherwise display the row
-                    return !(!isShowArrayMembers && ArrayVariable.isArrayMember(entry.getValue(variableNameIndex)));
+                    return !(!isShowArrayMembers
+                             && ArrayVariable.isArrayMember(entry.getValue(variableNameIndex)));
                 }
             };
         }
@@ -4670,7 +4703,8 @@ public class CcddTableEditorHandler extends CcddInputFieldPanelHandler
 
         // Copy the array definition row and blank the primary key and row indices to prevent
         // duplicate values for these columns
-        Object[] definitionData = Arrays.copyOf(tableData.get(definitionRow), tableData.get(definitionRow).length);
+        Object[] definitionData = Arrays.copyOf(tableData.get(definitionRow),
+                                                tableData.get(definitionRow).length);
         definitionData[primaryKeyIndex] = "";
         definitionData[rowIndex] = "";
 
@@ -4762,8 +4796,11 @@ public class CcddTableEditorHandler extends CcddInputFieldPanelHandler
                     for (int column = 0; column < tableData.get(row).length; column++)
                     {
                         // Check that this isn't a column that should be skipped
-                        if (column != primaryKeyIndex && column != rowIndex && column != variableNameIndex
-                            && column != dataTypeIndex && column != arraySizeIndex)
+                        if (column != primaryKeyIndex
+                            && column != rowIndex
+                            && column != variableNameIndex
+                            && column != dataTypeIndex
+                            && column != arraySizeIndex)
                         {
                             // Propagate the value to every member of the string
                             propagateArrayValues(tableData, row, column);
@@ -4868,7 +4905,9 @@ public class CcddTableEditorHandler extends CcddInputFieldPanelHandler
      * @param useRowRate True if the rate value for this row is used as the rate for the packed
      *                   variables; false to use the rate of the first variable in the pack
      *********************************************************************************************/
-    private void setAllPackedVariableRates(List<Object[]> tableData, int startRow, boolean useRowRate)
+    private void setAllPackedVariableRates(List<Object[]> tableData,
+                                           int startRow,
+                                           boolean useRowRate)
     {
         // Check if the table can have packed variables
         if (dataTypeIndex != -1 && bitLengthIndex != -1 && !rateIndex.isEmpty())
@@ -5165,7 +5204,10 @@ public class CcddTableEditorHandler extends CcddInputFieldPanelHandler
 
         // Check if a change wasn't detected above and that the variable path, variable name, and
         // data type columns are present
-        if (!isChanged && variablePathIndex != -1 && variableNameIndex != -1 && dataTypeIndex != -1)
+        if (!isChanged
+            && variablePathIndex != -1
+            && variableNameIndex != -1
+            && dataTypeIndex != -1)
         {
             // Step through each row in the table
             for (int row = 0; row < tableModel.getRowCount() && !isChanged; row++)
@@ -5193,7 +5235,10 @@ public class CcddTableEditorHandler extends CcddInputFieldPanelHandler
                             {
                                 // Set the flag to indicate if the variable path is automatically
                                 // set
-                                boolean isVarPathAuto = committedTableInfo.getData().get(commRow)[variablePathIndex].toString().isEmpty();
+                                boolean isVarPathAuto = committedTableInfo.getData()
+                                                                          .get(commRow)[variablePathIndex]
+                                                                          .toString()
+                                                                          .isEmpty();
 
                                 // Check if the variable path was manually set and has been changed
                                 // (either to a new name or allowed to be automatically), or the

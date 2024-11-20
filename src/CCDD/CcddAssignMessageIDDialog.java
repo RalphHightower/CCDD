@@ -1,5 +1,5 @@
-/**************************************************************************************************
- * /** \file CcddAssignMessageIDDialog.java
+/*************************************************************************************************/
+/** \file CcddAssignMessageIDDialog.java
  *
  * \author Kevin McCluney Bryan Willis
  *
@@ -1253,10 +1253,7 @@ public class CcddAssignMessageIDDialog extends CcddDialogHandler
             }
         }
 
-        // ////////////////////////////////////////////////////////////////////////////////////////
-        // Next assign message IDs to table data fields
-        // ////////////////////////////////////////////////////////////////////////////////////////
-        // Step through each defined data field
+        // Assign message IDs to table data fields. Step through each defined data field
         for (int index = 0; index < fieldInformation.size(); index++)
         {
             // Check if the user canceled ID assignment

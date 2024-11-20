@@ -1,5 +1,5 @@
-/**************************************************************************************************
- * /** \file CcddDbVerificationHandler.java
+/*************************************************************************************************/
+/** \file CcddDbVerificationHandler.java
  *
  * \author Kevin McCluney Bryan Willis
  *
@@ -2348,9 +2348,9 @@ public class CcddDbVerificationHandler
                                     // Data type doesn't exist
                                     issues.add(new TableIssue("Table '"
                                                               + tableInfo.getProtoVariableName()
-                                                              + "' variable '"
-                                                              + tableInfo.getData().get(row)[variableNameIndex].toString()
-                                                              + "' data type does not exist",
+                                                              + "' data type '"
+                                                              + tableInfo.getData().get(row)[dataTypeIndex].toString()
+                                                              + "' does not exist",
                                                               MANUAL_FIX,
                                                               row,
                                                               dataTypeIndex,
@@ -3294,14 +3294,14 @@ public class CcddDbVerificationHandler
             });
 
             // Update the selected inconsistencies button
-            JButton btnOk = CcddButtonPanelHandler.createButton("Okay",
-                                                                OK_ICON,
-                                                                KeyEvent.VK_O,
-                                                                "Correct the selected inconsistencies");
-            btnOk.setEnabled(dbControl.isAccessAdmin());
+            JButton btnCorrect = CcddButtonPanelHandler.createButton("Correct",
+                                                                      OK_ICON,
+                                                                      KeyEvent.VK_O,
+                                                                      "Correct the selected inconsistencies");
+            btnCorrect.setEnabled(dbControl.isAccessAdmin());
 
             // Add a listener for the Okay button
-            btnOk.addActionListener(new ActionListener()
+            btnCorrect.addActionListener(new ActionListener()
             {
                 String updateCmd;
 
@@ -3475,6 +3475,7 @@ public class CcddDbVerificationHandler
                                                                             true,
                                                                             true,
                                                                             false,
+                                                                            true,
                                                                             ccddMain.getMainFrame()))
                                                 {
                                                     // Set the flag indicating an error occurred
@@ -3676,14 +3677,14 @@ public class CcddDbVerificationHandler
             // Create a panel for the dialog buttons and add the buttons to the panel
             JPanel buttonPnl = new JPanel();
             buttonPnl.setBorder(emptyBorder);
-            buttonPnl.add(btnOk);
+            buttonPnl.add(btnCorrect);
             buttonPnl.add(btnPrint);
             buttonPnl.add(btnCancel);
 
             dialog.showOptionsDialog(ccddMain.getMainFrame(),
                                      dialogPnl,
                                      buttonPnl,
-                                     btnOk,
+                                     btnCorrect,
                                      "Perform Corrections",
                                      true);
         }

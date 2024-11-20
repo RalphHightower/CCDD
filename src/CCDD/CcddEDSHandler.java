@@ -1,5 +1,5 @@
-/**************************************************************************************************
- * /** \file CcddEDSHandler.java
+/*************************************************************************************************/
+/** \file CcddEDSHandler.java
  *
  * \author Kevin McCluney Bryan Willis
  *
@@ -1354,9 +1354,13 @@ public class CcddEDSHandler extends CcddImportExportSupportHandler implements Cc
      *                                [1] are the telemetry and command headers big endian (true or
      *                                false)
      *
-     * @throws JAXBException If an error occurs marshaling the project
+     * @throws JAXBException    If an error occurs marshaling the project
      *
-     * @throws Exception     If an unanticipated error occurs
+     * @throws MarshalException If an error occurs marshaling the project
+     *
+     * @throws CCDDException    If the user cancels the export
+     *
+     * @throws Exception        If an unanticipated error occurs
      *********************************************************************************************/
     @Override
     public void exportTables(FileEnvVar exportFile,
@@ -1441,7 +1445,8 @@ public class CcddEDSHandler extends CcddImportExportSupportHandler implements Cc
                                       + "\nHost: "
                                       + dbControl.getServer()
                                       + "\nEndianess: "
-                                      + (endianess == EndianType.BIG_ENDIAN ? "big" : "little"));
+                                      + (endianess == EndianType.BIG_ENDIAN ? "big"
+                                                                            : "little"));
         }
 
         // Get the names of the tables representing the telemetry and command headers
@@ -1481,21 +1486,29 @@ public class CcddEDSHandler extends CcddImportExportSupportHandler implements Cc
         if (tlmHeaderTable != null && !tlmHeaderTable.isEmpty())
         {
             // Store the telemetry header table name
-            createStringMetatdata(metadataSet, DefaultInputType.XML_TLM_HDR.getInputName(), tlmHeaderTable);
+            createStringMetatdata(metadataSet,
+                                  DefaultInputType.XML_TLM_HDR.getInputName(),
+                                  tlmHeaderTable);
         }
 
         // Check if the command header table name is defined
         if (cmdHeaderTable != null && !cmdHeaderTable.isEmpty())
         {
             // Store the command header table name
-            createStringMetatdata(metadataSet, DefaultInputType.XML_CMD_HDR.getInputName(), cmdHeaderTable);
+            createStringMetatdata(metadataSet,
+                                  DefaultInputType.XML_CMD_HDR.getInputName(),
+                                  cmdHeaderTable);
         }
 
         // Store the application ID variable name
-        createStringMetatdata(metadataSet, DefaultInputType.XML_APP_ID.getInputName(), applicationIDName);
+        createStringMetatdata(metadataSet,
+                              DefaultInputType.XML_APP_ID.getInputName(),
+                              applicationIDName);
 
         // Store the command function code variable name
-        createStringMetatdata(metadataSet, DefaultInputType.XML_FUNC_CODE.getInputName(), cmdFuncCodeName);
+        createStringMetatdata(metadataSet,
+                              DefaultInputType.XML_FUNC_CODE.getInputName(),
+                              cmdFuncCodeName);
 
         data.setMetadataValueSet(metadataSet);
         device.setMetadata(data);
@@ -2302,7 +2315,8 @@ public class CcddEDSHandler extends CcddImportExportSupportHandler implements Cc
                                            boolean includeDataTypes,
                                            String outputType,
                                            boolean addEOFMarker,
-                                           boolean addSOFMarker) throws CCDDException, Exception
+                                           boolean addSOFMarker) throws CCDDException,
+                                                                        Exception
     {
         // Placeholder
     }
@@ -2328,7 +2342,8 @@ public class CcddEDSHandler extends CcddImportExportSupportHandler implements Cc
     public void exportInternalCCDDData(boolean[] includes,
                                        CcddConstants.exportDataTypes[] dataTypes,
                                        FileEnvVar exportFile,
-                                       String outputType) throws CCDDException, Exception
+                                       String outputType) throws CCDDException,
+                                                                 Exception
     {
         // Placeholder
     }

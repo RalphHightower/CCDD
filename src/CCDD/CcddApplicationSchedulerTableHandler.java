@@ -1,5 +1,5 @@
-/**************************************************************************************************
- * /** \file CcddApplicationSchedulerTableHandler.java
+/*************************************************************************************************/
+/** \file CcddApplicationSchedulerTableHandler.java
  *
  * \author Kevin McCluney Bryan Willis
  *

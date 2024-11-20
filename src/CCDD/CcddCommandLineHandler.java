@@ -1,5 +1,5 @@
-/**************************************************************************************************
- * /** \file CcddCommandLineHandler.java
+/*************************************************************************************************/
+/** \file CcddCommandLineHandler.java
  *
  * \author Kevin McCluney Bryan Willis
  *
@@ -2362,7 +2362,7 @@ public class CcddCommandLineHandler
                         {
                             // Create the project database and check if creating the database
                             // fails. The project can't be created in a background thread since the
-                            //operation may not be complete before subsequent database operations
+                            // operation may not be complete before subsequent database operations
                             // are commanded
                             if (!ccddMain.getDbControlHandler().createDatabase(createName,
                                                                                createOwner,

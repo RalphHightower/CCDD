@@ -1,5 +1,5 @@
-/**************************************************************************************************
- * /** \file CcddApplicationSchedulerInput.java
+/*************************************************************************************************/
+/** \file CcddApplicationSchedulerInput.java
  *
  * \author Kevin McCluney Bryan Willis
  *

@@ -1,5 +1,5 @@
-/**************************************************************************************************
- * /** \file CcddTelemetrySchedulerDialog.java
+/*************************************************************************************************/
+/** \file CcddTelemetrySchedulerDialog.java
  *
  * \author Kevin McCluney Bryan Willis
  *

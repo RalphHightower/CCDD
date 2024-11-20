@@ -1,5 +1,5 @@
-/**************************************************************************************************
- * /** \file CcddKeyboardHandler.java
+/*************************************************************************************************/
+/** \file CcddKeyboardHandler.java
  *
  * \author Kevin McCluney Bryan Willis
  *
@@ -295,7 +295,8 @@ public class CcddKeyboardHandler
                             case KeyEvent.VK_UP:
                             case KeyEvent.VK_KP_UP:
                                 // Check if the up arrow key should be handled
-                                if (arrowResponse == HANDLE_ALL_ARROWS || arrowResponse == HANDLE_UP_ARROW
+                                if (arrowResponse == HANDLE_ALL_ARROWS
+                                    || arrowResponse == HANDLE_UP_ARROW
                                     || arrowResponse == HANDLE_UP_AND_DOWN_ARROWS)
                                 {
                                     // Treat the up arrow as a Shift+Tab key and indicate that the
@@ -328,7 +329,8 @@ public class CcddKeyboardHandler
                             case KeyEvent.VK_DOWN:
                             case KeyEvent.VK_KP_DOWN:
                                 // Check if the down arrow key should be handled
-                                if (arrowResponse == HANDLE_ALL_ARROWS || arrowResponse == HANDLE_DOWN_ARROW
+                                if (arrowResponse == HANDLE_ALL_ARROWS
+                                    || arrowResponse == HANDLE_DOWN_ARROW
                                     || arrowResponse == HANDLE_UP_AND_DOWN_ARROWS)
                                 {
                                     // Treat the down arrow as a Tab key and indicate that the key
@@ -1060,8 +1062,9 @@ public class CcddKeyboardHandler
 
             try
             {
-                // Check if the next cell should be selected prior to initiating editing
-                if (nextCell && !table.isEditing())
+                // Check if the next cell (if there is one) should be selected prior to initiating
+                // editing
+                if (nextCell && !table.isEditing() && table.getRowCount() > 0)
                 {
                     // Move selection to the next cell
                     Robot rbt = new Robot();

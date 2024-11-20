@@ -1,5 +1,5 @@
-/**************************************************************************************************
- * /** \file CcddTableEditorDialog.java
+/*************************************************************************************************/
+/** \file CcddTableEditorDialog.java
  *
  * \author Kevin McCluney Bryan Willis
  *
@@ -492,10 +492,13 @@ public class CcddTableEditorDialog extends CcddFrameHandler
                     if (mod.getVariableColumn() != -1 && mod.getDataTypeColumn() != -1)
                     {
                         // Update the table names in the open editors
-                        updateTableNames(main, mod.getOriginalRowData()[mod.getDataTypeColumn()].toString(),
+                        updateTableNames(main,
+                                         mod.getOriginalRowData()[mod.getDataTypeColumn()].toString(),
                                          mod.getRowData()[mod.getDataTypeColumn()].toString(),
                                          mod.getOriginalRowData()[mod.getVariableColumn()].toString(),
-                                         mod.getRowData()[mod.getVariableColumn()].toString(), editorDialog, editor);
+                                         mod.getRowData()[mod.getVariableColumn()].toString(),
+                                         editorDialog,
+                                         editor);
                     }
                 }
             }
@@ -2121,6 +2124,7 @@ public class CcddTableEditorDialog extends CcddFrameHandler
                                                 true,
                                                 true,
                                                 false,
+                                                true,
                                                 CcddTableEditorDialog.this);
                     }
                 }

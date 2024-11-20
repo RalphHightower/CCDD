@@ -1,5 +1,5 @@
-/**************************************************************************************************
- * /** \file CcddMacroHandler.java
+/*************************************************************************************************/
+/** \file CcddMacroHandler.java
  *
  * \author Kevin McCluney Bryan Willis
  *
@@ -94,11 +94,11 @@ public class CcddMacroHandler
     // List containing the macro definitions following an import operation
     private List<String[]> updatedMacros;
 
-    // Should we search for all macro references?
+    // Flag to indicate if all macro references should be searched
     private boolean skipSearchingReferences;
 
     // All macro references found during search
-    List<String> allMacroReferences;
+    private List<String> allMacroReferences;
 
     // List of macro references already loaded from the database. This is used to avoid repeated
     // searches for a the same macro

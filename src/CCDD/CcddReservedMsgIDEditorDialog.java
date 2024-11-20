@@ -1,5 +1,5 @@
-/**************************************************************************************************
- * /** \file CcddReservedMsgIDEditorDialog.java
+/*************************************************************************************************/
+/** \file CcddReservedMsgIDEditorDialog.java
  *
  * \author Kevin McCluney Bryan Willis
  *

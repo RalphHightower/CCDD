@@ -1,5 +1,5 @@
-/**************************************************************************************************
- * /** \file CcddConstants.java
+/*************************************************************************************************/
+/** \file CcddConstants.java
  *
  * \author Kevin McCluney Bryan Willis
  *
@@ -733,6 +733,73 @@ public class CcddConstants
         }
     }
 
+    /**********************************************************************************************
+     * File names
+     *********************************************************************************************/
+    public enum FileNames
+    {
+        TABLE_INFO("_table_Info.csv", "_table_Info.json", "_table_Info"),
+        GROUPS("_group_info.csv", "_group_info.json", "_group_info"),
+        MACROS("_macros.csv", "_macros.json", "_macros"),
+        SCRIPT_ASSOCIATION("_script_associations.csv", "_script_associations.json", "_script_associations"),
+        TELEM_SCHEDULER("_tlm_scheduler.csv", "_tlm_scheduler.json", "_tlm_scheduler"),
+        APP_SCHEDULER("_app_scheduler.csv", "_app_scheduler.json", "_app_scheduler"),
+        RESERVED_MSG_ID("_reserved_msg_ids.csv", "_reserved_msg_ids.json", "_reserved_msg_ids"),
+        PROJECT_DATA_FIELD("_proj_data_fields.csv", "_proj_data_fields.json", "_proj_data_fields"),
+        DBU_INFO("_dbu_info.csv", "_dbu_info.json", "_dbu_info");
+
+        private final String CSV;
+        private final String JSON;
+        private final String No_Extension;
+
+        /******************************************************************************************
+         * File name constructor
+         *
+         * @param CSV          File name with CSV extension
+         *
+         * @param JSON         File name with JSON extension
+         *
+         * @param No_Extension File name with no extension
+         *
+         *****************************************************************************************/
+        FileNames(String CSV, String JSON, String No_Extension)
+        {
+            this.CSV = CSV;
+            this.JSON = JSON;
+            this.No_Extension = No_Extension;
+        }
+
+        /******************************************************************************************
+         * Get the file name with CSV extension
+         *
+         * @return Text describing the data
+         *****************************************************************************************/
+        protected String CSV()
+        {
+            return CSV;
+        }
+
+        /******************************************************************************************
+         * Get the file name with JSON extension
+         *
+         * @return Text describing the data
+         *****************************************************************************************/
+        protected String JSON()
+        {
+            return JSON;
+        }
+
+        /******************************************************************************************
+         * Get the file name with no extension
+         *
+         * @return Text describing the data
+         *****************************************************************************************/
+        protected String No_Extension()
+        {
+            return No_Extension;
+        }
+    }
+
     // Modifiable font information
     protected static enum ModifiableFontInfo
     {
@@ -1081,73 +1148,6 @@ public class CcddConstants
                     }
                 }
             }
-        }
-    }
-
-    /**********************************************************************************************
-     * File names
-     *********************************************************************************************/
-    public enum FileNames
-    {
-        TABLE_INFO("_table_Info.csv", "_table_Info.json", "_table_Info"),
-        GROUPS("_group_info.csv", "_group_info.json", "_group_info"),
-        MACROS("_macros.csv", "_macros.json", "_macros"),
-        SCRIPT_ASSOCIATION("_script_associations.csv", "_script_associations.json", "_script_associations"),
-        TELEM_SCHEDULER("_tlm_scheduler.csv", "_tlm_scheduler.json", "_tlm_scheduler"),
-        APP_SCHEDULER("_app_scheduler.csv", "_app_scheduler.json", "_app_scheduler"),
-        RESERVED_MSG_ID("_reserved_msg_ids.csv", "_reserved_msg_ids.json", "_reserved_msg_ids"),
-        PROJECT_DATA_FIELD("_proj_data_fields.csv", "_proj_data_fields.json", "_proj_data_fields"),
-        DBU_INFO("_dbu_info.csv", "_dbu_info.json", "_dbu_info");
-
-        private final String CSV;
-        private final String JSON;
-        private final String No_Extension;
-
-        /******************************************************************************************
-         * File name constructor
-         *
-         * @param CSV          File name with CSV extension
-         *
-         * @param JSON         File name with JSON extension
-         *
-         * @param No_Extension File name with no extension
-         *
-         *****************************************************************************************/
-        FileNames(String CSV, String JSON, String No_Extension)
-        {
-            this.CSV = CSV;
-            this.JSON = JSON;
-            this.No_Extension = No_Extension;
-        }
-
-        /******************************************************************************************
-         * Get the file name with CSV extension
-         *
-         * @return Text describing the data
-         *****************************************************************************************/
-        protected String CSV()
-        {
-            return CSV;
-        }
-
-        /******************************************************************************************
-         * Get the file name with JSON extension
-         *
-         * @return Text describing the data
-         *****************************************************************************************/
-        protected String JSON()
-        {
-            return JSON;
-        }
-
-        /******************************************************************************************
-         * Get the file name with no extension
-         *
-         * @return Text describing the data
-         *****************************************************************************************/
-        protected String No_Extension()
-        {
-            return No_Extension;
         }
     }
 
@@ -6752,8 +6752,10 @@ public class CcddConstants
      *********************************************************************************************/
     protected static enum DialogOption
     {
-        OK_CANCEL_OPTION("Okay", 'O', "Cancel", OK_ICON, 2, 0), OK_OPTION("Okay", 'O', "", OK_ICON, 1, 0),
-        OPEN_OPTION("Open", 'O', "Cancel", OK_ICON, 2, -1), PRINT_OPTION("Print", 'P', "Close", PRINT_ICON, 2, -1),
+        OK_CANCEL_OPTION("Okay", 'O', "Cancel", OK_ICON, 2, 0),
+        OK_OPTION("Okay", 'O', "", OK_ICON, 1, 0),
+        OPEN_OPTION("Open", 'O', "Cancel", OK_ICON, 2, -1),
+        PRINT_OPTION("Print", 'P', "Close", PRINT_ICON, 2, -1),
         CREATE_OPTION("Create", 'R', "Cancel", INSERT_ICON, 2, -1),
         DELETE_OPTION("Delete", 'D', "Cancel", DELETE_ICON, 2, -1),
         IMPORT_OPTION("Import", 'I', "Cancel", IMPORT_ICON, 2, -1),
@@ -6762,7 +6764,8 @@ public class CcddConstants
         UPDATE_OPTION("Update Description", 'U', "", REPLACE_ICON, 1, -1, UPDATE_BUTTON),
         CANCEL_OPTION("Cancel", 'C', "", CANCEL_ICON, 1, -1, CANCEL_BUTTON),
         OWNER_OPTION("Change Owner", 'C', "Cancel", RENAME_ICON, 2, -1),
-        COPY_OPTION("Copy", 'P', "Cancel", COPY_ICON, 2, -1), BACKUP_OPTION("Backup", 'B', "Cancel", COPY_ICON, 2, -1),
+        COPY_OPTION("Copy", 'P', "Cancel", COPY_ICON, 2, -1),
+        BACKUP_OPTION("Backup", 'B', "Cancel", COPY_ICON, 2, -1),
         RESTORE_OPTION("Restore", 'R', "Cancel", UNDO_ICON, 2, -1),
         STORE_OPTION("Store", 'S', "Cancel", COPY_ICON, 2, -1),
         RETRIEVE_OPTION("Retrieve", 'R', "Cancel", UNDO_ICON, 2, -1),
@@ -6824,6 +6827,7 @@ public class CcddConstants
         DialogOption(DialogOption[] options)
         {
             this.optionArray = options;
+
             // Set these to defaults
             this.buttonText = "";
             this.buttonMnemonic = '~';

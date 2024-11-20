@@ -1,5 +1,5 @@
-/**************************************************************************************************
- * /** \file CcddApplicationParameterDialog.java
+/*************************************************************************************************/
+/** \file CcddApplicationParameterDialog.java
  *
  * \author Kevin McCluney Bryan Willis
  *

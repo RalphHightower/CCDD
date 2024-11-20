@@ -1,5 +1,5 @@
-/**************************************************************************************************
- * /** \file CcddPreferencesDialog.java
+/*************************************************************************************************/
+/** \file CcddPreferencesDialog.java
  *
  * \author Kevin McCluney Bryan Willis
  *
@@ -27,11 +27,11 @@
 package CCDD;
 
 import static CCDD.CcddConstants.CLOSE_ICON;
+import static CCDD.CcddConstants.FONT_SCALE;
 import static CCDD.CcddConstants.LAF_SCROLL_BAR_WIDTH;
 import static CCDD.CcddConstants.RADIO_BUTTON_CHANGE_EVENT;
 import static CCDD.CcddConstants.STORE_ICON;
 import static CCDD.CcddConstants.UNDO_ICON;
-import static CCDD.CcddConstants.FONT_SCALE;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -1402,7 +1402,7 @@ public class CcddPreferencesDialog extends CcddDialogHandler
                 // Get the index of the path field array, which is stored as the button's name
                 int index = Integer.valueOf(((JButton) ae.getSource()).getName());
 
-                // Allow the user to select the script file path + name
+                // Allow the user to select the file path + name
                 FileEnvVar[] pathFile = new CcddDialogHandler().choosePathFile(ccddMain,
                                                                                CcddPreferencesDialog.this,
                                                                                "Select Path",

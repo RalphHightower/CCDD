@@ -1,5 +1,5 @@
-/**************************************************************************************************
- * /** \file CcddTableManagerDialog.java
+/*************************************************************************************************/
+/** \file CcddTableManagerDialog.java
  *
  * \author Kevin McCluney Bryan Willis
  *
@@ -123,8 +123,8 @@ public class CcddTableManagerDialog extends CcddDialogHandler
     private JCheckBox includeProjectFieldsCb;
     private JCheckBox includeGroupsCb;
     private JCheckBox includeAssociationsCb;
-    private JCheckBox includeTlmSchedCB;
-    private JCheckBox includeAppSchedCB;
+    private JCheckBox includeTlmSchedCb;
+    private JCheckBox includeAppSchedCb;
     private JCheckBox exportEntireDatabaseCb;
     private JCheckBox deleteTargetDirectoryCb;
     private JCheckBox includeAllTableTypesCb;
@@ -729,8 +729,8 @@ public class CcddTableManagerDialog extends CcddDialogHandler
                                                                                (includeProjectFieldsCb != null ? includeProjectFieldsCb.isSelected() : false),
                                                                                (includeGroupsCb != null ? includeGroupsCb.isSelected() : false),
                                                                                (includeAssociationsCb != null ? includeAssociationsCb.isSelected() : false),
-                                                                               (includeTlmSchedCB != null ? includeTlmSchedCB.isSelected() : false),
-                                                                               (includeAppSchedCB != null ? includeAppSchedCB.isSelected() : false),
+                                                                               (includeTlmSchedCb != null ? includeTlmSchedCb.isSelected() : false),
+                                                                               (includeAppSchedCb != null ? includeAppSchedCb.isSelected() : false),
                                                                                (includeVariablePaths != null ? includeVariablePaths.isSelected() : false),
                                                                                (includeVariablePaths != null
                                                                                 && includeVariablePaths.isSelected() ? ccddMain.getVariableHandler()
@@ -1567,11 +1567,11 @@ public class CcddTableManagerDialog extends CcddDialogHandler
                         includeAssociationsCb.setEnabled(!exportEntireDatabaseCb.isSelected());
                         includeAssociationsCb.setSelected(exportEntireDatabaseCb.isSelected());
 
-                        includeTlmSchedCB.setEnabled(!exportEntireDatabaseCb.isSelected());
-                        includeTlmSchedCB.setSelected(exportEntireDatabaseCb.isSelected());
+                        includeTlmSchedCb.setEnabled(!exportEntireDatabaseCb.isSelected());
+                        includeTlmSchedCb.setSelected(exportEntireDatabaseCb.isSelected());
 
-                        includeAppSchedCB.setEnabled(!exportEntireDatabaseCb.isSelected());
-                        includeAppSchedCB.setSelected(exportEntireDatabaseCb.isSelected());
+                        includeAppSchedCb.setEnabled(!exportEntireDatabaseCb.isSelected());
+                        includeAppSchedCb.setSelected(exportEntireDatabaseCb.isSelected());
                     }
                 });
 
@@ -1675,39 +1675,39 @@ public class CcddTableManagerDialog extends CcddDialogHandler
                 includePnl.add(includeAssociationsCb, gbc);
 
                 // Create the telemetry scheduler inclusion check box
-                includeTlmSchedCB = new JCheckBox("Telemetry scheduler");
-                includeTlmSchedCB.setFont(ModifiableFontInfo.LABEL_BOLD.getFont());
-                includeTlmSchedCB.setBorder(emptyBorder);
+                includeTlmSchedCb = new JCheckBox("Telemetry scheduler");
+                includeTlmSchedCb.setFont(ModifiableFontInfo.LABEL_BOLD.getFont());
+                includeTlmSchedCb.setBorder(emptyBorder);
 
                 // This check box is only usable during a JSON export
                 if ((fileExtn != FileExtension.JSON) && (fileExtn != FileExtension.CSV))
                 {
-                    includeTlmSchedCB.setEnabled(false);
+                    includeTlmSchedCb.setEnabled(false);
                 }
 
-                includeTlmSchedCB.setToolTipText(CcddUtilities.wrapText("If checked, the telemetry scheduler "
+                includeTlmSchedCb.setToolTipText(CcddUtilities.wrapText("If checked, the telemetry scheduler "
                                                                         + " table will be exported in a file",
                                                                         ModifiableSizeInfo.MAX_TOOL_TIP_LENGTH.getSize()));
                 gbc.gridx = 0;
                 gbc.gridy++;
-                includePnl.add(includeTlmSchedCB, gbc);
+                includePnl.add(includeTlmSchedCb, gbc);
 
                 // Create the application scheduler inclusion check box
-                includeAppSchedCB = new JCheckBox("Application scheduler");
-                includeAppSchedCB.setFont(ModifiableFontInfo.LABEL_BOLD.getFont());
-                includeAppSchedCB.setBorder(emptyBorder);
+                includeAppSchedCb = new JCheckBox("Application scheduler");
+                includeAppSchedCb.setFont(ModifiableFontInfo.LABEL_BOLD.getFont());
+                includeAppSchedCb.setBorder(emptyBorder);
 
                 // This check box is only usable during a JSON export
                 if ((fileExtn != FileExtension.JSON) && (fileExtn != FileExtension.CSV))
                 {
-                    includeAppSchedCB.setEnabled(false);
+                    includeAppSchedCb.setEnabled(false);
                 }
 
-                includeAppSchedCB.setToolTipText(CcddUtilities.wrapText("If checked, the application scheduler "
+                includeAppSchedCb.setToolTipText(CcddUtilities.wrapText("If checked, the application scheduler "
                                                                         + " table will be exported in a file",
                                                                         ModifiableSizeInfo.MAX_TOOL_TIP_LENGTH.getSize()));
                 gbc.gridx++;
-                includePnl.add(includeAppSchedCB, gbc);
+                includePnl.add(includeAppSchedCb, gbc);
 
                 // Create the include build information check box
                 includeBuildInfoCb = new JCheckBox("Build information");
@@ -1841,8 +1841,8 @@ public class CcddTableManagerDialog extends CcddDialogHandler
                     includeProjectFieldsCb.setEnabled(false);
                     includeGroupsCb.setEnabled(false);
                     includeAssociationsCb.setEnabled(false);
-                    includeTlmSchedCB.setEnabled(false);
-                    includeAppSchedCB.setEnabled(false);
+                    includeTlmSchedCb.setEnabled(false);
+                    includeAppSchedCb.setEnabled(false);
                 }
             }
 
@@ -2460,8 +2460,8 @@ public class CcddTableManagerDialog extends CcddDialogHandler
                         && !(includeProjectFieldsCb != null ? includeProjectFieldsCb.isSelected() : false)
                         && !(includeGroupsCb != null ? includeGroupsCb.isSelected() : false)
                         && !(includeAssociationsCb != null ? includeAssociationsCb.isSelected() : false)
-                        && !(includeTlmSchedCB != null ? includeTlmSchedCB.isSelected() : false)
-                        && !(includeAppSchedCB != null ? includeAppSchedCB.isSelected() : false)
+                        && !(includeTlmSchedCb != null ? includeTlmSchedCb.isSelected() : false)
+                        && !(includeAppSchedCb != null ? includeAppSchedCb.isSelected() : false)
                         && !(includeVariablePaths != null ? includeVariablePaths.isSelected() : false))
                     {
                         // Inform the user that no table or include option has been selected

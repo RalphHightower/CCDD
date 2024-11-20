@@ -13,9 +13,20 @@ _Note: The master branch contains_ **CCDD version 1**_, which is superseded by_ 
 
 * Beginning with CCDD version 2.1 PostgreSQL versions 12 and later are supported
 
-* CCDD version 2 works with Java 7-13
+* CCDD version 2 works with Java 7-13 (and later)
 
 * Beginning with CCDD version 2.1.2 Python 3 is supported
+
+*** Version 2.1.13 has been released **
+
+Below is a brief description of what has changed in version 2.1.13
+* Corrected the database verification check for data tables for an invalid use of the variable name index if a data type is undefined, but the table doesn't have a variable name column
+* Eliminated flickering when updating the Halt/progress dialogs
+* Changed to keep a halt dialog in front of its parent window
+* Added a total logged event counter to the event windows
+* Corrected issue in the patch handler that causes removal of OIDs to fail
+* Corrected issue with the __users table when restoring a database that has not been patched to remove OIDs
+* Added a progress/halt dialog when applying table updates (additions/modifications/deletion).
 
 *** Version 2.1.12 has been released **
 

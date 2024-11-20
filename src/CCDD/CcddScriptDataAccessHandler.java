@@ -1,5 +1,5 @@
-/**************************************************************************************************
- * /** \file CcddScriptDataAccessHandler.java
+/*************************************************************************************************/
+/** \file CcddScriptDataAccessHandler.java
  *
  * \author Kevin McCluney Bryan Willis
  *
@@ -3787,6 +3787,16 @@ public class CcddScriptDataAccessHandler
     public String[][] getMacroDefinitions()
     {
         return macroHandler.getMacroData().toArray(new String[0][0]);
+    }
+
+    /**********************************************************************************************
+     * Get the expanded value of the specified the macro
+     *
+     * @return Expanded value of the specified the macro
+     *********************************************************************************************/
+    public String getMacroExpansion(String macroName)
+    {
+        return macroHandler.getMacroExpansion(macroName);
     }
 
     /**********************************************************************************************

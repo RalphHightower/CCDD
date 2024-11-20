@@ -1,5 +1,5 @@
-/**************************************************************************************************
- * /** \file CcddEventLogDialog.java
+/*************************************************************************************************/
+/** \file CcddEventLogDialog.java
  *
  * \author Kevin McCluney Bryan Willis
  *
@@ -106,6 +106,7 @@ public class CcddEventLogDialog extends CcddFrameHandler
     private JCheckBox[] filterCheckBox;
     private FileEnvVar logFile;
     private PrintWriter logWriter;
+    private JLabel totalEventsCountLabel;
 
     // Set to true if this event log is for the current session
     private final boolean isSessionLog;
@@ -596,8 +597,18 @@ public class CcddEventLogDialog extends CcddFrameHandler
                 }
             };
 
-            // Create a panel for the event filter check boxes
+            // Create a panel for the total number of events and the event filter check boxes
             JPanel filterPanel = new JPanel();
+
+            // Display the total number of logged events
+            JLabel totalEventsLabel = new JLabel("Total events: ");
+            totalEventsLabel.setFont(ModifiableFontInfo.LABEL_BOLD.getFont());
+            filterPanel.add(totalEventsLabel);
+            totalEventsCountLabel = new JLabel(String.valueOf(eventTable.getModel().getRowCount()));
+            totalEventsCountLabel.setFont(ModifiableFontInfo.LABEL_PLAIN.getFont());
+            filterPanel.add(totalEventsCountLabel);
+            filterPanel.add(new JLabel("     "));
+
             JLabel filterLabel = new JLabel("Event filter: ");
             filterLabel.setFont(ModifiableFontInfo.LABEL_BOLD.getFont());
             filterPanel.add(filterLabel);
@@ -615,7 +626,7 @@ public class CcddEventLogDialog extends CcddFrameHandler
                 index++;
             }
 
-            // STart with the Command filter set to off
+            // Start with the Command filter set to off
             setFilter(EventLogMessageType.COMMAND_MSG, false);
 
             // Enable or disable the web server message filter check box based on if the web server
@@ -1114,7 +1125,9 @@ public class CcddEventLogDialog extends CcddFrameHandler
                                            truncateLogMessage(logMessage.toString())},
                              false);
 
+
         // Update the log entry counter
+        totalEventsCountLabel.setText(String.valueOf(indexNum));
         indexNum++;
 
         // Check if the event log file exists

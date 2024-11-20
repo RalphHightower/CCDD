@@ -1,5 +1,5 @@
-/**************************************************************************************************
- * /** \file CcddPatchHandler.java
+/*************************************************************************************************/
+/** \file CcddPatchHandler.java
  *
  * \author Kevin McCluney Bryan Willis
  *
@@ -137,7 +137,7 @@ public class CcddPatchHandler
      * @throws CCDDException If the user elects to not install the patch or an error occurs while
      *                       applying the patch
      *
-     * @throws SQLException If an error occurs accessing the database or creating a patch table
+     * @throws SQLException  If an error occurs accessing the database or creating a patch table
      *********************************************************************************************/
     protected void applyPatches(int stage) throws CCDDException, SQLException
     {
@@ -148,7 +148,7 @@ public class CcddPatchHandler
 
         switch(stage)
         {
-            //Perform any patches to update this project database to the latest schema that must
+            // Perform any patches to update this project database to the latest schema that must
             // be implemented prior to creating the functions and internal files
             case 0:
                 // Patches requiring a patch-applied table:
@@ -162,7 +162,7 @@ public class CcddPatchHandler
             // be implemented prior to initializing the handler classes
             case 1:
                 // Patch #01112023: Convert the project to eliminate the OID columns in the
-                //internal tables
+                // internal tables
                 eliminateOIDs();
 
                 // Patch #05022023: Update the primary key column input type to 'Non-negative
@@ -406,7 +406,7 @@ public class CcddPatchHandler
                 for (InternalTable intTable : InternalTable.values())
                 {
                     // Only update internal tables that use the OID column
-                    if (intTable != InternalTable.VALUES)
+                    if (intTable != InternalTable.VALUES && intTable != InternalTable.PATCH)
                     {
                         // Check if the table isn't a script
                         if (intTable != InternalTable.SCRIPT)
@@ -659,6 +659,9 @@ public class CcddPatchHandler
     /**********************************************************************************************
      * An integer cast, '(int)', is applied to math expressions in tables cells and the macro table
      * that include a macro and a division operator
+     *
+     * @throws CCDDException If the user elects to not install the patch or an error occurs while
+     *                       applying the patch
      *********************************************************************************************/
     private void addIntegerCastsToMathExpressions() throws CCDDException
     {

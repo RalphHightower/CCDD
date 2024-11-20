@@ -1,5 +1,5 @@
-/**************************************************************************************************
- * /** \file CcddCSVHandler.java
+/*************************************************************************************************/
+/** \file CcddCSVHandler.java
  *
  * \author Kevin McCluney Bryan Willis
  *
@@ -2205,7 +2205,8 @@ public class CcddCSVHandler extends CcddImportExportSupportHandler implements Cc
                              CcddVariableHandler variableHandler,
                              String[] separators,
                              String outputType,
-                             Object... extraInfo) throws CCDDException, Exception
+                             Object... extraInfo) throws CCDDException,
+                                                         Exception
     {
         // Initialize local variables
         List<String[]> variablePaths = new ArrayList<String[]>();
@@ -2751,7 +2752,8 @@ public class CcddCSVHandler extends CcddImportExportSupportHandler implements Cc
     public void exportInternalCCDDData(boolean[] includes,
                                        CcddConstants.exportDataTypes[] dataTypes,
                                        FileEnvVar exportFile,
-                                       String outputType) throws CCDDException, Exception
+                                       String outputType) throws CCDDException,
+                                                                 Exception
     {
         // Initialize local variables
         List<String> referencedMacros = new ArrayList<String>();
@@ -2890,7 +2892,7 @@ public class CcddCSVHandler extends CcddImportExportSupportHandler implements Cc
                                     List<FieldInformation> groupFieldInfo = fieldHandler.getFieldInformationByOwner("Group:"
                                                                                                                     + groupInfo.getName());
 
-                                    // Does this group have any data fields?
+                                    // Check if the group has any data fields
                                     if (groupFieldInfo != null && groupFieldInfo.size() > 0)
                                     {
                                         // Append the label for this groups data fields
@@ -3116,7 +3118,8 @@ public class CcddCSVHandler extends CcddImportExportSupportHandler implements Cc
                                            boolean includeDataTypes,
                                            String outputType,
                                            boolean addEOFMarker,
-                                           boolean addSOFMarker) throws CCDDException, Exception
+                                           boolean addSOFMarker) throws CCDDException,
+                                                                        Exception
     {
         // Init local variables
         List<String> referencedTableTypes = new ArrayList<String>();

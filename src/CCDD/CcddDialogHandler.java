@@ -1,5 +1,5 @@
-/**************************************************************************************************
- * /** \file CcddDialogHandler.java
+/*************************************************************************************************/
+/** \file CcddDialogHandler.java
  *
  * \author Kevin McCluney Bryan Willis
  *
@@ -222,6 +222,7 @@ public class CcddDialogHandler extends JDialog
         buttonSelected = JOptionPane.CLOSED_OPTION;
         radioButtonSelected = new ArrayList<String>();
         checkBox = null;
+        initialFocusComponent = null;
 
         // Create a handler for the dialog buttons
         buttonHandler = new CcddButtonPanelHandler()
@@ -425,7 +426,8 @@ public class CcddDialogHandler extends JDialog
     protected int showMessageDialog(Component parent,
                                     String message,
                                     String title,
-                                    DialogOption optionType, Icon icon)
+                                    DialogOption optionType,
+                                    Icon icon)
     {
         return createDialog(parent, message, null, null, title, optionType, icon, false, true);
     }
@@ -1234,7 +1236,6 @@ public class CcddDialogHandler extends JDialog
             // Check if the file name text field isn't empty
             if (!fileNames[0].isEmpty())
             {
-
                 // Create a file array
                 file = new FileEnvVar[fileNames.length];
 

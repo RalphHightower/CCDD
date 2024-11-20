@@ -1,5 +1,5 @@
-/**************************************************************************************************
- * /** \file CcddPaddingVariableHandler.java
+/*************************************************************************************************/
+/** \file CcddPaddingVariableHandler.java
  *
  * \author Kevin McCluney Bryan Willis
  *
@@ -568,6 +568,7 @@ public class CcddPaddingVariableHandler
                                         true,
                                         true,
                                         false,
+                                        false,
                                         ccddMain.getMainFrame());
             }
         }
@@ -622,15 +623,16 @@ public class CcddPaddingVariableHandler
                     dataTypeHandler = ccddMain.getDataTypeHandler();
 
                     // Create the padding adjustment cancellation dialog
-                    haltDlg = new CcddHaltDialog((padOperation == PadOperationType.ADD_UPDATE ? "Adding/updating"
-                                                                                              : "Removing"),
+                    haltDlg = new CcddHaltDialog((padOperation == PadOperationType.ADD_UPDATE ? "Adding/Updating"
+                                                                                              : "Removing")
+                                                 + " Padding",
                                                  "Loading prototype tables",
                                                  "padding adjustment",
+                                                 1,
                                                  referencedProtoStructTables.size()
                                                  * (padOperation == PadOperationType.ADD_UPDATE ? 2 : 1)
                                                  + selectedProtoStructTables.size()
                                                  * (padOperation == PadOperationType.ADD_UPDATE ? 3 : 2),
-                                                 1,
                                                  parent);
 
                     // Step through each referenced prototype structure table

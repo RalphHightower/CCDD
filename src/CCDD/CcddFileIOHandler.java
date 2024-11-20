@@ -1,5 +1,5 @@
-/**************************************************************************************************
- * /** \file CcddFileIOHandler.java
+/*************************************************************************************************/
+/** \file CcddFileIOHandler.java
  *
  * \author Kevin McCluney Bryan Willis
  *
@@ -204,8 +204,7 @@ public class CcddFileIOHandler
                                           + File.separator
                                           + USERS_GUIDE);
 
-                    // Display the user's guide - replace the .jar file name with the user's guide
-                    // name
+                    // Display the user's guide
                     Desktop.getDesktop().open(guide);
                 }
                 catch (Exception e)
@@ -562,6 +561,7 @@ public class CcddFileIOHandler
             boolean inBackupDatabaseInfoTable = false;
             boolean inUsers = false;
             boolean isOwnerAdmin = false;
+            boolean hasOID = false;
             int userRow = 1;
             String line = null;
             String commentText = "";
@@ -569,8 +569,7 @@ public class CcddFileIOHandler
             // Create a temporary file in which to copy the backup file contents
             tempFile = File.createTempFile(dataFile[0].getName(), "");
 
-            // Create a buffered reader to read the file and a buffered writer to write the
-            // file
+            // Create a buffered reader to read the file and a buffered writer to write the file
             br = new BufferedReader(new FileReader(dataFile[0]));
             bw = new BufferedWriter(new FileWriter(tempFile));
 
@@ -584,37 +583,36 @@ public class CcddFileIOHandler
                     if (line.equals("CREATE PROCEDURAL LANGUAGE plpgsql;")
                         || line.equals("CREATE OR REPLACE PROCEDURAL LANGUAGE plpgsql;"))
                     {
-                        // Add the command to first drop the language. This allows backups
-                        // created from PostgreSQL versions 8.4 and earlier to be restored
-                        // in version 9.0 and subsequent without generating an error
+                        // Add the command to first drop the language. This allows backups created
+                        // from PostgreSQL versions 8.4 and earlier to be restored in version 9.0
+                        // and subsequent without generating an error
                         line = "DROP LANGUAGE IF EXISTS plpgsql;\nCREATE PROCEDURAL LANGUAGE plpgsql;";
 
                         // Check if the PostgeSQL version is 9 or higher
                         if (dbControl.getPostgreSQLMajorVersion() > 8)
                         {
-                            // Add the command to drop the language extension; this is
-                            // necessary in order for the language to be dropped in
-                            // PostgreSQL 9+
+                            // Add the command to drop the language extension; this is necessary in
+                            // order for the language to be dropped in PostgreSQL 9+
                             line = "DROP EXTENSION plpgsql;\n" + line;
                         }
                     }
                     // Check if this line adds a comment to the plpgsql language
                     else if (line.startsWith("COMMENT ON EXTENSION plpgsql"))
                     {
-                        // Ignore the comment; this can cause an ownership error and the
-                        // comment isn't needed
+                        // Ignore the comment; this can cause an ownership error and the comment
+                        // isn't needed
                         line = "";
                     }
-                    // Check if this is the beginning of the command to populate the user
-                    // access level table
+                    // Check if this is the beginning of the command to populate the user access
+                    // level table
                     else if (line.matches("COPY (?:[^\\.]+\\.)?" + InternalTable.USERS.getTableName() + " .+"))
                     {
-                        // Set the flag to indicate the following lines contain the user
-                        // access level information
+                        // Set the flag to indicate the following lines contain the user access
+                        // level information
                         inUsers = true;
                     }
-                    // Check if this line follows the command to populate the user access
-                    // level table
+                    // Check if this line follows the command to populate the user access level
+                    // table
                     else if (inUsers)
                     {
                         // Check if this line defines a user's access level
@@ -622,14 +620,34 @@ public class CcddFileIOHandler
                         {
                             ++userRow;
 
-                            if (line.matches(projectOwner + "+\\s+.+"))
+                            // Check if the row starts with a number (OID). This can occur if
+                            // restoring an older database that has not been patched to removed
+                            // OIDs
+                            if (line.matches("\\d+\\s+.+"))
                             {
-                                // Set the flag to indicate the project owner is already in
-                                // the user access level table
+                                hasOID = true;
+
+                                // Check if the line starts with with the project owner
+                                if (line.matches("\\d+\\s+" + projectOwner + "+\\s+.+"))
+                                {
+                                    // Set the flag to indicate the project owner is already in the
+                                    // user access level table
+                                    isOwnerAdmin = true;
+
+                                    // Make the project owner an administrator for the restored
+                                    // project
+                                    line = line.replaceFirst("^(.+\\s+.+\\s+).+$",
+                                                             "$1" + AccessLevel.ADMIN.getDisplayName());
+                                }
+                            }
+                            // Check if the line starts with with the project owner
+                            else if (line.matches(projectOwner + "+\\s+.+"))
+                            {
+                                // Set the flag to indicate the project owner is already in the
+                                // user access level table
                                 isOwnerAdmin = true;
 
-                                // Make the project owner an administrator for the restored
-                                // project
+                                // Make the project owner an administrator for the restored project
                                 line = line.replaceFirst("^(.+\\s+).+(\\s+.+)$",
                                                          "$1" + AccessLevel.ADMIN.getDisplayName() + "$2");
                             }
@@ -637,36 +655,53 @@ public class CcddFileIOHandler
                         // The last user access level definition was reached
                         else
                         {
-                            // Set the flag so that subsequent lines are not considered a
-                            // user access level definition
+                            // Set the flag so that subsequent lines are not considered a user
+                            // access level definition
                             inUsers = false;
 
-                            // Check if the owner for the restored project is not in the
-                            // user access level table
+                            // Check if the owner for the restored project is not in the user
+                            // access level table
                             if (!isOwnerAdmin)
                             {
-                                // Add the project owner as an administrator for the
-                                // restored project
-                                line = projectOwner
-                                       + "\t"
-                                       + AccessLevel.ADMIN.getDisplayName()
-                                       + "\t"
-                                       + userRow
-                                       + "\n"
-                                       + line;
+                                // Check if the database still contains OIDs
+                                if (hasOID)
+                                {
+                                    // Add the project owner as an administrator for the restored
+                                    // project
+                                    line = "11111111"
+                                           + "\t"
+                                           + projectOwner
+                                           + "\t"
+                                           + AccessLevel.ADMIN.getDisplayName()
+                                           + "\n"
+                                           + line;
+                                }
+                                // The database has been patched to remove OIDs
+                                else
+                                {
+                                    // Add the project owner as an administrator for the restored
+                                    // project
+                                    line = projectOwner
+                                           + "\t"
+                                           + AccessLevel.ADMIN.getDisplayName()
+                                           + "\t"
+                                           + userRow
+                                           + "\n"
+                                           + line;
+                                }
                             }
                         }
                     }
-                    // Check if this line is a SQL command that revokes permissions for an
-                    // owner other than PUBLIC
+                    // Check if this line is a SQL command that revokes permissions for an owner
+                    // other than PUBLIC
                     else if (line.matches("REVOKE .+ FROM .+;\\s*")
                              && !line.matches("REVOKE .+ FROM PUBLIC;\\s*"))
                     {
                         // Change the original owner to the current user
                         line = line.replaceFirst("FROM .+;", "FROM " + projectOwner + ";");
                     }
-                    // Check if this line is a SQL command that grants permissions to an
-                    // owner other than PUBLIC
+                    // Check if this line is a SQL command that grants permissions to an owner
+                    // other than PUBLIC
                     else if (line.matches("GRANT .+ TO .+;\\s*")
                              && !line.matches("GRANT .+ TO PUBLIC;\\s*"))
                     {
@@ -674,8 +709,8 @@ public class CcddFileIOHandler
                         line = line.replaceFirst("TO .+;", "TO " + projectOwner + ";");
                     }
 
-                    // Check if the database comment hasn't been found already and that the
-                    // line contains the comment information
+                    // Check if the database comment hasn't been found already and that the line
+                    // contains the comment information
                     if (!commentFound
                         && line.matches("COMMENT ON DATABASE .+ IS '"
                                         + CCDD_PROJECT_IDENTIFIER
@@ -698,16 +733,15 @@ public class CcddFileIOHandler
                     backupDBUInfoFound = true;
                 }
 
-                // Check if this line is the beginning or a continuance of the database
-                // comment
+                // Check if this line is the beginning or a continuance of the database comment
                 if (inComment)
                 {
                     // Begin, or append the continuance of the database description, to the
                     // database comment command text
                     commentText += (commentText.isEmpty() ? "" : "\n") + line;
 
-                    // Insert a comment indicator into the file so that this line isn't
-                    // executed when the database is restored
+                    // Insert a comment indicator into the file so that this line isn't executed
+                    // when the database is restored
                     line = "-- " + line;
 
                     // Set the flag to true if the comment continues to the next line
@@ -734,8 +768,8 @@ public class CcddFileIOHandler
                 // Flush the output file buffer so that none of the contents are lost
                 bw.flush();
 
-                // Check if the database name and description aren't provided explicitly,
-                // and a comment was extracted from the backup file
+                // Check if the database name and description aren't provided explicitly, and a
+                // comment was extracted from the backup file
                 if (!nameDescProvided && commentFound)
                 {
                     // Extract the database name from the comment
@@ -746,33 +780,32 @@ public class CcddFileIOHandler
                                                          + CCDD_PROJECT_IDENTIFIER + "(.+)';$",
                                                          "$1");
 
-                    // Split the line read from the file in order to get the project name
-                    // and description
+                    // Split the line read from the file in order to get the project name and
+                    // description
                     String[] comment = dbControl.parseDatabaseComment(databaseName, commentText);
 
-                    // Extract the project name (with case preserved) and description, and
-                    // set the flag indicating the comment is located
+                    // Extract the project name (with case preserved) and description, and set the
+                    // flag indicating the comment is located
                     projectName = comment[DatabaseComment.PROJECT_NAME.ordinal()];
                     projectAdministrator = comment[DatabaseComment.ADMINS.ordinal()];
                     projectDescription = comment[DatabaseComment.DESCRIPTION.ordinal()];
                 }
                 else if (!nameDescProvided && backupDBUInfoFound)
                 {
-                    // Split the line read from the file in order to get the project
-                    // information
+                    // Split the line read from the file in order to get the project information
                     String[] comment = new String[4];
                     String[] temp = backupDBUInfo.replace("\n", "").split("\t");
                     System.arraycopy(temp, 0, comment, 0, 4);
 
-                    // Extract the project name (with case preserved) and description, and
-                    // set the flag indicating the comment is located
+                    // Extract the project name (with case preserved) and description, and set the
+                    // flag indicating the comment is located
                     projectName = comment[DatabaseComment.PROJECT_NAME.ordinal()];
                     projectAdministrator = comment[DatabaseComment.ADMINS.ordinal()];
                     projectDescription = comment[DatabaseComment.DESCRIPTION.ordinal()];
                 }
 
-                // Check if the project owner isn't in the administrator list embedded in
-                // the database comment
+                // Check if the project owner isn't in the administrator list embedded in the
+                // database comment
                 if (!projectAdministrator.matches("(?:^|,)" + projectOwner + "(?:,|$)"))
                 {
                     // Add the project owner as an administrator
@@ -783,9 +816,9 @@ public class CcddFileIOHandler
                 // Check if the backup file is restored via the command line
                 if (isCmdLine)
                 {
-                    // Restore the database from the temporary file. This file has the line
-                    // that disables creation of the database comment, which is handled
-                    // when the restored database is created
+                    // Restore the database from the temporary file. This file has the line that
+                    // disables creation of the database comment, which is handled when the
+                    // restored database is created
                     dbControl.restoreDatabase(projectName,
                                               projectOwner,
                                               projectAdministrator,
@@ -796,10 +829,9 @@ public class CcddFileIOHandler
                 // The the backup file is restored via the GUI
                 else
                 {
-                    // Restore the database from the temporary file as a background
-                    // process. This file has the line that disables creation of the
-                    // database comment, which is handled when the restored database is
-                    // created
+                    // Restore the database from the temporary file as a background process. This
+                    // file has the line that disables creation of the database comment, which is
+                    // handled when the restored database is created
                     dbControl.restoreDatabaseInBackground(projectName,
                                                           projectOwner,
                                                           projectAdministrator,
@@ -998,8 +1030,8 @@ public class CcddFileIOHandler
                 // Check if the provided path belongs to a directory
                 if (path.isDirectory())
                 {
-                    // If we are working with a directory then place all of the files within
-                    // the directory within a list of type FileEnvVar
+                    // If we are working with a directory then place all of the files within the
+                    // directory within a list of type FileEnvVar
                     File[] files = path.listFiles();
                     FileEnvVar[] tempFiles = new FileEnvVar[files.length];
 
@@ -1676,7 +1708,7 @@ public class CcddFileIOHandler
                     }
 
                     // Update the progress bar
-                    haltDlg.updateProgressBar("Reading import file " + file.getName());
+                    haltDlg.updateProgressBar("Reading import file '</b>" + file.getName() + "<b>'");
                 }
 
                 // Check if the files being imported are JSON/CSV files
@@ -2253,7 +2285,8 @@ public class CcddFileIOHandler
             // Check if the user elected to enable replacement of existing macro values
             if (replaceExistingMacros)
             {
-                // Verify that the new macro values are valid for the current instances of the macros
+                // Verify that the new macro values are valid for the current instances of the
+                // macros
                 macroHandler.validateMacroUsage(parent);
 
                 // Update the usage of the macros in the tables
@@ -2302,10 +2335,10 @@ public class CcddFileIOHandler
                     }
 
                     // Update the progress bar
-                    haltDlg.updateProgressBar("Creating table " + tableDefn.getName());
+                    haltDlg.updateProgressBar("Creating table '</b>" + tableDefn.getName() + "<b>'");
                 }
 
-                // Is this the last/only table definition?
+                // Check if this is the last/only table definition
                 if (tableDefnIndex == tableDefinitions.size() - 1)
                 {
                     lastTableDefn = true;
@@ -2398,7 +2431,7 @@ public class CcddFileIOHandler
                     String rootTable = tableInfo.getRootTable();
                     boolean isRootTable = false;
 
-                    // Are we working with a root table?
+                    // Check if this is a root table
                     if (rootTable.contentEquals(tableInfo.getTablePath()))
                     {
                         isRootTable = true;
@@ -2786,10 +2819,14 @@ public class CcddFileIOHandler
                                                  false,
                                                  true,
                                                  replaceExisting,
-                                                 tableInfo.isPrototype())) // It's okay to overwrite existing 'unalterable'
-                                                                           // cells if it's a proto/root (or not a structure)
+                                                 tableInfo.isPrototype())) // It's okay to
+                                                                           // overwrite existing
+                                                                           // 'unalterable' cells
+                                                                           // if it's a proto/root
+                                                                           // (or not a structure)
             {
-                eventLog.logEvent(EventLogMessageType.STATUS_MSG, new StringBuilder("Import canceled by user"));
+                eventLog.logEvent(EventLogMessageType.STATUS_MSG,
+                                  new StringBuilder("Import canceled by user"));
                 throw new CCDDException();
             }
 
@@ -2810,6 +2847,7 @@ public class CcddFileIOHandler
                                         lastTableDefn,
                                         isRootTable,
                                         ignoreErrors,
+                                        false,
                                         parent))
             {
                 throw new CCDDException();
@@ -3177,10 +3215,10 @@ public class CcddFileIOHandler
                 }
             }
 
-            // Does the field exist?
+            // Check if the field exists
             if (fieldExists)
             {
-                // Did the user decide to use existing fields?
+                // Check if the user opted to use the existing fields
                 if (useExistingFields)
                 {
                     // Remove the new data field definition and replace it with the existing
@@ -3483,14 +3521,14 @@ public class CcddFileIOHandler
         FileEnvVar file = null;
         CcddImportExportInterface ioHandler = null;
         List<String> skippedTables = new ArrayList<String>();
-
-        // Are we writing to a single file or multiple files?
         String outputType = "";
 
+        // Check if writing to a single file
         if (singleFile)
         {
             outputType = EXPORT_SINGLE_FILE;
         }
+        // Writing to multiple files
         else
         {
             outputType = EXPORT_MULTIPLE_FILES;
@@ -3564,8 +3602,8 @@ public class CcddFileIOHandler
                 // Check if the tables are to be exported to a single file
                 if (singleFile)
                 {
-                    // Exporting all tables to a single file. Check if the file already exists, if
-                    // not one will be created. If it does then did the user elect to overwrite it?
+                    // Exporting all tables to a single file. Check if the file already exists; if
+                    // so verify that the user elected to overwrite it
                     if (isOverwriteExportFileIfExists(file, overwriteFile, parent))
                     {
                         List<TableInfo> tableDefs = null;
@@ -3642,8 +3680,8 @@ public class CcddFileIOHandler
                                               + tableDef.getTablePath().replaceAll("[,\\.\\[\\]]", "_")
                                               + fileExtn.getExtension());
 
-                        // Check if a file exists for this table. If it doesn't one will be
-                        // created. If it does did the user elect to overwrite it?
+                        // Check if a file exists for this table; if so verify that the user
+                        // elected to overwrite it
                         if (isOverwriteExportFileIfExists(file, overwriteFile, parent))
                         {
                             List<TableInfo> singleDef = new ArrayList<TableInfo>(1);
@@ -4508,7 +4546,7 @@ public class CcddFileIOHandler
      * @param ignoreIfContains Text that, if contained in both of the lines being compared, causes
      *                         the lines to be skipped
      *
-     *@throws IOException Error occurred reading file(s)
+     * @throws IOException Error occurred reading file(s)
      *
      * @return True if the files match, false otherwise
      *********************************************************************************************/
@@ -4529,9 +4567,9 @@ public class CcddFileIOHandler
             // Read in the line from the second file
             line2 = bf2.readLine();
 
-            // Check if the second file has fewer lines than the first file or if the lines
-            // don't match. If an ignore string is supplied then do not test for a match if the
-            // lines contain the string
+            // Check if the second file has fewer lines than the first file or if the lines don't
+            // match. If an ignore string is supplied then do not test for a match if the lines
+            // contain the string
             if (line2 == null ||
                 (!line1.equals(line2)
                  && (ignoreIfContains.isEmpty()
@@ -4656,7 +4694,7 @@ public class CcddFileIOHandler
             // an error occurs, the data file list is cleared
             if (dataFiles.length != 0)
             {
-                // Are we importing a single large file that represents the whole database?
+                // Check if importing a single large file that represents the whole database
                 if (importingEntireDatabase && (dataFiles.length == 1))
                 {
                     if (dialogType == ManagerDialogType.IMPORT_JSON)
@@ -4738,8 +4776,7 @@ public class CcddFileIOHandler
                         {
                             for (int index2 = 0; index2 < importFiles.size(); index2++)
                             {
-                                // Do the filenames equal each other? Or, is the deletedFile
-                                // element in question not of the correct extension?
+                                // Check if the file names are the same equal each other
                                 if (deletedFiles.get(index).getName().equals(importFiles.get(index2).getName()))
                                 {
                                     // Compare the two files
@@ -4815,7 +4852,7 @@ public class CcddFileIOHandler
                                                         parent);
 
                                     // If tables were deleted then that means the database has been
-                                     // altered
+                                    // altered
                                     dataWasChanged = true;
                                 }
                             }

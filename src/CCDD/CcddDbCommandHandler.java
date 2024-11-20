@@ -1,5 +1,5 @@
-/**************************************************************************************************
- * /** \file CcddDbCommandHandler.java
+/*************************************************************************************************/
+/** \file CcddDbCommandHandler.java
  *
  * \author Kevin McCluney Bryan Willis
  *
@@ -329,7 +329,7 @@ public class CcddDbCommandHandler
      *
      * @return Command in the format of a PreparedStatement
      *
-     * @throws SQLException Command fails
+     * @throws SQLException If command fails
      *********************************************************************************************/
     public PreparedStatement executePreparedStatement(StringBuilder command,
                                                       Component component) throws SQLException

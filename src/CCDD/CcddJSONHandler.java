@@ -1,5 +1,5 @@
-/**************************************************************************************************
- * /** \file CcddJSONHandler.java
+/*************************************************************************************************/
+/** \file CcddJSONHandler.java
  *
  * \author Kevin McCluney Bryan Willis
  *
@@ -366,8 +366,8 @@ public class CcddJSONHandler extends CcddImportExportSupportHandler implements C
                                      ImportType importType,
                                      boolean ignoreErrors,
                                      boolean replaceExistingAssociations) throws CCDDException,
-                                                                          IOException,
-                                                                          Exception
+                                                                                 IOException,
+                                                                                 Exception
     {
         BufferedReader br = null;
 
@@ -617,8 +617,8 @@ public class CcddJSONHandler extends CcddImportExportSupportHandler implements C
      * @throws CCDDException  If the parsed json object is not of type JSONObject
      *********************************************************************************************/
     protected void verifyJSONObjectType(FileEnvVar importFile) throws IOException,
-                                                               ParseException,
-                                                               CCDDException
+                                                                      ParseException,
+                                                                      CCDDException
     {
         // Create a JSON parser and use it to parse the import file contents
         JSONParser jsonParser = new JSONParser();
@@ -660,8 +660,8 @@ public class CcddJSONHandler extends CcddImportExportSupportHandler implements C
                                 boolean replaceExistingMacros,
                                 boolean replaceExistingTables,
                                 boolean importingEntireDatabase) throws CCDDException,
-                                                                 IOException,
-                                                                 Exception
+                                                                        IOException,
+                                                                        Exception
     {
         BufferedReader br = null;
 
@@ -962,8 +962,8 @@ public class CcddJSONHandler extends CcddImportExportSupportHandler implements C
                                  boolean ignoreErrors,
                                  boolean replaceExistingDataTypes,
                                  boolean importingEntireDatabase) throws CCDDException,
-                                                                  IOException,
-                                                                  Exception
+                                                                         IOException,
+                                                                         Exception
     {
         BufferedReader br = null;
 
@@ -1163,8 +1163,8 @@ public class CcddJSONHandler extends CcddImportExportSupportHandler implements C
                                boolean replaceExistingMacros,
                                boolean replaceExistingGroups,
                                boolean replaceExistingTables) throws CCDDException,
-                                                              IOException,
-                                                              Exception
+                                                                     IOException,
+                                                                     Exception
     {
         // Initialize a buffered reader
         BufferedReader br = null;
@@ -1790,7 +1790,8 @@ public class CcddJSONHandler extends CcddImportExportSupportHandler implements C
                              CcddVariableHandler variableHandler,
                              String[] separators,
                              String outputType,
-                             Object... extraInfo) throws CCDDException, Exception
+                             Object... extraInfo) throws CCDDException,
+                                                         Exception
     {
         // Initialize local variables
         List<String[]> variablePaths = new ArrayList<String[]>();
@@ -2496,7 +2497,8 @@ public class CcddJSONHandler extends CcddImportExportSupportHandler implements C
     public void exportInternalCCDDData(boolean[] includes,
                                        CcddConstants.exportDataTypes[] dataTypes,
                                        FileEnvVar exportFile,
-                                       String outputType) throws CCDDException, Exception
+                                       String outputType) throws CCDDException,
+                                                                 Exception
     {
         // Create a set of writers for the output file(s)
         FileWriter fw = null;
@@ -2824,7 +2826,8 @@ public class CcddJSONHandler extends CcddImportExportSupportHandler implements C
                                            boolean includeDataTypes,
                                            String outputType,
                                            boolean addEOFMarker,
-                                           boolean addSOFMarker) throws CCDDException, Exception
+                                           boolean addSOFMarker) throws CCDDException,
+                                                                        Exception
     {
         List<String> referencedTableTypes = new ArrayList<String>();
         List<String> referencedInputTypes = new ArrayList<String>();

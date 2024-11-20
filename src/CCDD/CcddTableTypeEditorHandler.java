@@ -1,5 +1,5 @@
-/**************************************************************************************************
- * /** \file CcddTableTypeEditorHandler.java
+/*************************************************************************************************/
+/** \file CcddTableTypeEditorHandler.java
  *
  * \author Kevin McCluney Bryan Willis
  *
@@ -1182,9 +1182,6 @@ public class CcddTableTypeEditorHandler extends CcddInputFieldPanelHandler
      *********************************************************************************************/
     protected void buildUpdates() throws CCDDException
     {
-        // ////////////////////////////////////////////////////////////////////////////////////////
-        // Build the changes to the table type's column definitions
-        // ////////////////////////////////////////////////////////////////////////////////////////
         // Get the table type data array
         Object[][] typeData = table.getTableData(true);
 

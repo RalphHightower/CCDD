@@ -1,5 +1,5 @@
-/**************************************************************************************************
- * /** \file CcddImportExportSupportHandler.java
+/*************************************************************************************************/
+/** \file CcddImportExportSupportHandler.java
  *
  * \author Kevin McCluney Bryan Willis
  *
@@ -193,7 +193,7 @@ public class CcddImportExportSupportHandler
      *
      * @param exportFile Reference to the user-specified output file
      *
-     * @throws JAXBException If an error occurs marshaling the project
+     * @throws JAXBException        If an error occurs marshaling the project
      *
      * @throws TransformerException If an error occurs transforming the project
      *********************************************************************************************/
@@ -302,7 +302,7 @@ public class CcddImportExportSupportHandler
                     }
 
                     // Check if a table type definition already exists with this name, but differing properties
-                    if (tableTypeHandler.updateTableTypes(tableTypeDefn) == TableTypeUpdate.MISMATCH)
+                    while (tableTypeHandler.updateTableTypes(tableTypeDefn) == TableTypeUpdate.MISMATCH)
                     {
                         // Alter the name so that there isn't a duplicate
                         typeName = TYPE_STRUCTURE + " " + sequence;
@@ -412,7 +412,7 @@ public class CcddImportExportSupportHandler
                     }
 
                     // Check if a table type definition already exists with this name, but differing properties
-                    if (tableTypeHandler.updateTableTypes(tableTypeDefn) == TableTypeUpdate.MISMATCH)
+                    while (tableTypeHandler.updateTableTypes(tableTypeDefn) == TableTypeUpdate.MISMATCH)
                     {
                         // Alter the name so that there isn't a duplicate
                         typeName = STRUCT_CMD_ARG_REF + " " + sequence;
@@ -517,9 +517,9 @@ public class CcddImportExportSupportHandler
                                                              parent);
                     }
 
-
-                    // Check if a table type definition already exists with this name, but differing properties
-                    if (tableTypeHandler.updateTableTypes(tableTypeDefn) == TableTypeUpdate.MISMATCH)
+                    // Check if a table type definition already exists with this name, but
+                    // differing properties
+                    while (tableTypeHandler.updateTableTypes(tableTypeDefn) == TableTypeUpdate.MISMATCH)
                     {
                         // Alter the name so that there isn't a duplicate
                         typeName = TYPE_COMMAND + " " + sequence;
@@ -2143,7 +2143,7 @@ public class CcddImportExportSupportHandler
             }
 
             // Update the progress bar
-            haltDlg.updateProgressBar("Export table " + tableName);
+            haltDlg.updateProgressBar("Export table '</b>" + tableName + "<b>'");
         }
     }
 

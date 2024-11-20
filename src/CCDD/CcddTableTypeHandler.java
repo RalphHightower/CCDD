@@ -1,5 +1,5 @@
-/**************************************************************************************************
- * /** \file CcddTableTypeHandler.java
+/*************************************************************************************************/
+/** \file CcddTableTypeHandler.java
  *
  * \author Kevin McCluney Bryan Willis
  *
@@ -26,8 +26,8 @@ package CCDD;
 
 import static CCDD.CcddConstants.NUM_HIDDEN_COLUMNS;
 import static CCDD.CcddConstants.TYPE_COMMAND;
-import static CCDD.CcddConstants.TYPE_STRUCTURE;
 import static CCDD.CcddConstants.TYPE_ENUM;
+import static CCDD.CcddConstants.TYPE_STRUCTURE;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -47,9 +47,9 @@ import CCDD.CcddConstants.DefaultInputType;
 import CCDD.CcddConstants.FieldEditorColumnInfo;
 import CCDD.CcddConstants.InputTypeFormat;
 import CCDD.CcddConstants.InternalTable;
-import CCDD.CcddConstants.OverwriteFieldValueType;
 import CCDD.CcddConstants.InternalTable.FieldsColumn;
 import CCDD.CcddConstants.InternalTable.TableTypesColumn;
+import CCDD.CcddConstants.OverwriteFieldValueType;
 import CCDD.CcddConstants.TableTypeEditorColumnInfo;
 import CCDD.CcddConstants.TableTypeUpdate;
 
@@ -1115,22 +1115,23 @@ public class CcddTableTypeHandler
     }
 
     /**********************************************************************************************
-     * Remove an existing table type (if it is found) Add a new table type
+     * Remove an existing table type (if it is found)
      *
-     * @param eTypeName The name of the existing table type. If it is found it will be removed from
-     *                  the list
+     * @param typeName The name of the existing table type. If it is found it will be removed from
+     *                 the list
      *********************************************************************************************/
-    protected void removeTypeDefinition(String eTypeName)
+    protected void removeTypeDefinition(String typeName)
     {
         // Get the reference to the type definition
-        TypeDefinition typeDefn = getTypeDefinition(eTypeName);
+        TypeDefinition typeDefn = getTypeDefinition(typeName);
 
-        // Check if this type already exists
+        // Check if this type exists
         if (typeDefn != null)
         {
             // Delete the type definition
             typeDefinitions.remove(typeDefn);
         }
+
         return;
     }
 

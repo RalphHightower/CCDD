@@ -1,5 +1,5 @@
-/**************************************************************************************************
- * /** \file CcddImportExportInterface.java
+/*************************************************************************************************/
+/** \file CcddImportExportInterface.java
  *
  * \author Kevin McCluney Bryan Willis
  *
@@ -292,7 +292,7 @@ public interface CcddImportExportInterface
      *
      * @throws JAXBException If an error occurs marshaling the project
      *
-     * @throws CCDDException If an error occurs executing an external (script) method
+     * @throws CCDDException If an error occurs exporting a table
      *
      * @throws Exception     If an unanticipated error occurs
      *********************************************************************************************/
