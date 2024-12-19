@@ -2143,7 +2143,7 @@ public class CcddImportExportSupportHandler
             }
 
             // Update the progress bar
-            haltDlg.updateProgressBar("Export table '</b>" + tableName + "<b>'");
+            haltDlg.updateProgressBar("Export table '" + tableName + "'");
         }
     }
 

@@ -1708,7 +1708,7 @@ public class CcddFileIOHandler
                     }
 
                     // Update the progress bar
-                    haltDlg.updateProgressBar("Reading import file '</b>" + file.getName() + "<b>'");
+                    haltDlg.updateProgressBar("Reading import file '" + file.getName() + "'");
                 }
 
                 // Check if the files being imported are JSON/CSV files
@@ -2335,7 +2335,7 @@ public class CcddFileIOHandler
                     }
 
                     // Update the progress bar
-                    haltDlg.updateProgressBar("Creating table '</b>" + tableDefn.getName() + "<b>'");
+                    haltDlg.updateProgressBar("Creating table '" + tableDefn.getName() + "'");
                 }
 
                 // Check if this is the last/only table definition
